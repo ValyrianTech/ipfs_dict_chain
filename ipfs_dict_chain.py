@@ -11,6 +11,10 @@ IPFS_API = None
 IPFS_CACHE = {}
 
 
+class IPFSError(Exception):
+    pass
+
+
 def connect_to_ipfs(host: str, port: int) -> None:
     global IPFS_API
 
@@ -20,7 +24,7 @@ def connect_to_ipfs(host: str, port: int) -> None:
         IPFS_API = ipfshttpclient.connect(multi_address)
         LOG.info('Connected with IPFS')
     except Exception as ex:
-        LOG.error(f'IPFS node is not running: {ex}')
+        raise IPFSError(f'IPFS node is not running: {ex}')
 
 
 def check_ipfs() -> bool:
@@ -36,7 +40,7 @@ def check_ipfs() -> bool:
 class CID:
     def __init__(self, value: str):
         if not isinstance(value, str):
-            raise Exception(f'Value of a cid must be a string, got {type(value)} instead')
+            raise ValueError(f'Value of a cid must be a string, got {type(value)} instead')
 
         self.value = value if value.startswith('/ipfs/') else f'/ipfs/{value}'
 
@@ -53,17 +57,13 @@ class CID:
 def add_json(data: Dict[str, Any]) -> str:
     global IPFS_API
 
+    if not check_ipfs():
+        raise IPFSError("Not connected to IPFS")
+
     try:
         cid = IPFS_API.add_json(data)
     except Exception as e:
-        LOG.error(f'Failed to store json data on IPFS: {e}')
-        LOG.error(f'Data: {data}')
-        LOG.error('Sleeping 1 second before trying again...')
-        time.sleep(1)
-        try:
-            cid = IPFS_API.add_json(data)
-        except Exception as e:
-            raise Exception(f'Failed to store json data on IPFS: {e}')
+        raise IPFSError(f'Failed to store json data on IPFS: {e}')
 
     return CID(cid).__str__()
 
@@ -71,18 +71,18 @@ def add_json(data: Dict[str, Any]) -> str:
 def get_json(cid: str) -> Optional[Dict[str, Any]]:
     global IPFS_API, IPFS_CACHE
 
+    if not check_ipfs():
+        raise IPFSError("Not connected to IPFS")
+
     if cid in IPFS_CACHE:
         return IPFS_CACHE[cid]
 
-    json = None
     try:
         json = IPFS_API.get_json(cid, timeout=2)
     except Exception as e:
-        LOG.error(f'Failed to retrieve json data from IPFS hash {cid}: {e}')
+        raise IPFSError(f'Failed to retrieve json data from IPFS hash {cid}: {e}')
 
-    if cid not in IPFS_CACHE:
-        IPFS_CACHE[cid] = json
-
+    IPFS_CACHE[cid] = json
     return json
 
 
@@ -105,18 +105,15 @@ class IPFSDict:
 
     def load(self, cid: str) -> None:
         if not isinstance(cid, str):
-            LOG.error(f'Can not retrieve IPFS data: cid must be a string or unicode, got {type(cid)} instead')
-            return
+            raise ValueError(f'Can not retrieve IPFS data: cid must be a string or unicode, got {type(cid)} instead')
 
         try:
             data = get_json(cid=cid)
-        except Exception as e:
-            LOG.error(f'Can not retrieve IPFS data of {cid}: {e}')
-            return
+        except IPFSError as e:
+            raise IPFSError(f'Can not retrieve IPFS data of {cid}: {e}')
 
         if not isinstance(data, dict):
-            LOG.error(f'IPFS cid {cid} does not contain a dict!')
-            return
+            raise IPFSError(f'IPFS cid {cid} does not contain a dict!')
 
         self._cid = CID(cid).__str__()
 
