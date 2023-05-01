@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import asyncio
 import json
 import os
 import aioipfs
@@ -39,7 +40,7 @@ async def get(cid: str) -> str:
     return data
 
 
-async def add_json(data: Dict) -> str:
+async def _add_json(data: Dict) -> str:
     """Add JSON data to IPFS and return its Content Identifier (CID).
 
     Args:
@@ -60,7 +61,7 @@ async def add_json(data: Dict) -> str:
     return response.get('Hash', None)
 
 
-async def get_json(cid: str) -> Dict:
+async def _get_json(cid: str) -> Dict:
     """Retrieve JSON data from IPFS by its Content Identifier (CID) and cache the result.
 
     Args:
@@ -85,4 +86,34 @@ async def get_json(cid: str) -> Dict:
         raise IPFSError(f'Failed to parse json data from IPFS hash {cid}: {e}')
 
     IPFS_CACHE[cid] = data
+    return json_data
+
+
+def add_json(data: Dict) -> str:
+    """Add JSON data to IPFS and return its Content Identifier (CID) using a synchronous wrapper.
+
+    Args:
+        data (Dict): The JSON data to be added to IPFS.
+
+    Returns:
+        str: The Content Identifier (CID) of the added JSON data.
+    """
+    loop = asyncio.new_event_loop()
+    cid = loop.run_until_complete(_add_json(data=data))
+    loop.close()
+    return cid
+
+
+def get_json(cid: str) -> Dict:
+    """Retrieve JSON data from IPFS by its Content Identifier (CID) using a synchronous wrapper.
+
+    Args:
+        cid (str): The Content Identifier (CID) of the JSON data in IPFS.
+
+    Returns:
+        Dict: The JSON data retrieved from IPFS.
+    """
+    loop = asyncio.new_event_loop()
+    json_data = loop.run_until_complete(_get_json(cid=cid))
+    loop.close()
     return json_data
