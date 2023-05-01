@@ -24,10 +24,24 @@ class IPFSCache:
     def __init__(self):
         self._cache = {}
 
-    def get(self, cid: str):
+    def get(self, cid: str) -> Dict:
+        """Retrieve data from the cache by its Content Identifier (CID).
+
+        Args:
+            cid (str): The Content Identifier (CID) of the data in the cache.
+
+        Returns:
+            Dict: The data retrieved from the cache.
+        """
         return self._cache.get(cid)
 
-    def set(self, cid: str, data: Dict):
+    def set(self, cid: str, data: Dict) -> None:
+        """Store data in the cache with its Content Identifier (CID).
+
+        Args:
+            cid (str): The Content Identifier (CID) of the data.
+            data (Dict): The data to be stored in the cache.
+        """
         self._cache[cid] = data
 
 
@@ -36,14 +50,17 @@ ipfs_cache = IPFSCache()
 
 @contextmanager
 def event_loop():
+    """Context manager for managing an asyncio event loop."""
     loop = asyncio.new_event_loop()
     try:
         yield loop
+    except Exception as e:
+        print(f'Error in event loop: {e}')
     finally:
         loop.close()
 
 
-async def get(cid: str) -> str:
+async def get_file_content(cid: str) -> str:
     """Retrieve the content of a file from IPFS by its Content Identifier (CID).
 
     Args:
@@ -100,7 +117,7 @@ async def _get_json(cid: str) -> Dict:
         return cached_data
 
     try:
-        data = await get(cid=cid)
+        data = await get_file_content(cid=cid)
     except Exception as e:
         raise IPFSError(f'Failed to retrieve json data from IPFS hash {cid}: {e}')
 
