@@ -2,10 +2,9 @@
 # -*- coding: utf-8 -*-
 import json
 import os
-
 import aioipfs
 from multiaddr import Multiaddr
-
+from typing import Dict
 
 IPFS_CACHE = {}
 HOST = '127.0.0.1'
@@ -40,11 +39,11 @@ async def get(cid: str) -> str:
     return data
 
 
-async def add_json(data: dict) -> str:
+async def add_json(data: Dict) -> str:
     """Add JSON data to IPFS and return its Content Identifier (CID).
 
     Args:
-        data (dict): The JSON data to be added to IPFS.
+        data (Dict): The JSON data to be added to IPFS.
 
     Returns:
         str: The Content Identifier (CID) of the added JSON data.
@@ -61,14 +60,14 @@ async def add_json(data: dict) -> str:
     return response.get('Hash', None)
 
 
-async def get_json(cid: str) -> dict:
+async def get_json(cid: str) -> Dict:
     """Retrieve JSON data from IPFS by its Content Identifier (CID) and cache the result.
 
     Args:
         cid (str): The Content Identifier (CID) of the JSON data in IPFS.
 
     Returns:
-        dict: The JSON data retrieved from IPFS.
+        Dict: The JSON data retrieved from IPFS.
     """
     global IPFS_CACHE
 
