@@ -14,10 +14,19 @@ multi_address = Multiaddr(f'/ip4/{HOST}/tcp/{PORT}')
 
 
 class IPFSError(Exception):
+    """Custom exception for IPFS-related errors."""
     pass
 
 
 async def get(cid: str) -> str:
+    """Retrieve the content of a file from IPFS by its Content Identifier (CID).
+
+    Args:
+        cid (str): The Content Identifier (CID) of the file in IPFS.
+
+    Returns:
+        str: The content of the file.
+    """
     client = aioipfs.AsyncIPFS(maddr=multi_address)
 
     await client.get(cid, dstdir='.')
@@ -32,6 +41,14 @@ async def get(cid: str) -> str:
 
 
 async def add_json(data: dict) -> str:
+    """Add JSON data to IPFS and return its Content Identifier (CID).
+
+    Args:
+        data (dict): The JSON data to be added to IPFS.
+
+    Returns:
+        str: The Content Identifier (CID) of the added JSON data.
+    """
     client = aioipfs.AsyncIPFS(maddr=multi_address)
 
     try:
@@ -45,6 +62,14 @@ async def add_json(data: dict) -> str:
 
 
 async def get_json(cid: str) -> Coroutine[Any, Any, str] | Any:
+    """Retrieve JSON data from IPFS by its Content Identifier (CID) and cache the result.
+
+    Args:
+        cid (str): The Content Identifier (CID) of the JSON data in IPFS.
+
+    Returns:
+        Coroutine[Any, Any, str] | Any: The JSON data retrieved from IPFS.
+    """
     global IPFS_CACHE
 
     if cid in IPFS_CACHE:
