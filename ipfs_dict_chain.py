@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import json
 import os
 
 import aioipfs
 from multiaddr import Multiaddr
-from typing import Any, Coroutine
 
 
 IPFS_CACHE = {}
@@ -54,21 +54,21 @@ async def add_json(data: dict) -> str:
     try:
         response = await client.add_json(data=data)
     except Exception as e:
-        raise IPFSError(f'Failed to add json data to IPFS: {e}')
+        raise IPFSError(f'Failed to add JSON data to IPFS: {e}')
     finally:
         await client.close()
 
     return response.get('Hash', None)
 
 
-async def get_json(cid: str) -> Coroutine[Any, Any, str] | Any:
+async def get_json(cid: str) -> dict:
     """Retrieve JSON data from IPFS by its Content Identifier (CID) and cache the result.
 
     Args:
         cid (str): The Content Identifier (CID) of the JSON data in IPFS.
 
     Returns:
-        Coroutine[Any, Any, str] | Any: The JSON data retrieved from IPFS.
+        dict: The JSON data retrieved from IPFS.
     """
     global IPFS_CACHE
 
@@ -80,5 +80,10 @@ async def get_json(cid: str) -> Coroutine[Any, Any, str] | Any:
     except Exception as e:
         raise IPFSError(f'Failed to retrieve json data from IPFS hash {cid}: {e}')
 
+    try:
+        json_data = json.loads(data)
+    except Exception as e:
+        raise IPFSError(f'Failed to parse json data from IPFS hash {cid}: {e}')
+
     IPFS_CACHE[cid] = data
-    return data
+    return json_data
