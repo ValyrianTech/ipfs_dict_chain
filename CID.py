@@ -2,7 +2,7 @@ from typing import Any
 
 
 class CID:
-    def __init__(self, value: str):
+    def __init__(self, value: str) -> None:
         """
         Initialize a CID object with the given value.
 
