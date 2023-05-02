@@ -1,15 +1,19 @@
+import re
 from typing import Any
 
 
 class CID:
-    def __init__(self, value: str) -> None:
-        """
-        Initialize a CID object with the given value.
+    """
+    A class representing a Content Identifier (CID) in the IPFS network.
 
-        :param value: The CID value as a string.
-        """
-        if not isinstance(value, str):
-            raise ValueError(f'Value of a cid must be a string, got {type(value)} instead')
+    :param value: The CID value as a string.
+    """
+
+    CID_REGEX = re.compile(r'^(/ipfs/)?[A-Za-z0-9]+$')
+
+    def __init__(self, value: str) -> None:
+        if not isinstance(value, str) or not self.CID_REGEX.match(value):
+            raise ValueError(f'Invalid CID value: {value}')
 
         self.value = value if value.startswith('/ipfs/') else f'/ipfs/{value}'
 
@@ -26,6 +30,10 @@ class CID:
         if not isinstance(other, CID):
             return False
         return self.value == other.value
+
+    def __hash__(self) -> int:
+        """Return the hash value of the CID object."""
+        return hash(self.value)
 
     def short(self) -> str:
         """
