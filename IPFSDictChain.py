@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 from IPFS import add_json
 from IPFSDict import IPFSDict
@@ -53,3 +53,23 @@ class IPFSDictChain(IPFSDict):
             changes = {key: {'new': self.__getattribute__(key)} for key in self.items()}
 
         return changes
+
+    def get_previous_states(self, max_depth: Optional[int] = None) -> List[Dict[str, Any]]:
+        """Returns a list of previous states as dictionaries.
+
+        :param max_depth: The maximum number of previous states to return, defaults to None
+        :type max_depth: Optional[int], optional
+        :return: A list of previous state dictionaries
+        :rtype: List[Dict[str, Any]]
+        """
+        previous_states = []
+        current_cid = self.previous_cid
+        depth = 0
+
+        while current_cid is not None and (max_depth is None or depth < max_depth):
+            previous_state = IPFSDictChain(cid=current_cid)
+            previous_states.append(dict(previous_state.items()))
+            current_cid = previous_state.previous_cid
+            depth += 1
+
+        return previous_states
