@@ -17,6 +17,14 @@ pip install ipfs_dict_chain
 
 ## Usage
 
+If your IPFS node is not running on localhost on the default port, you must first connect to your IPFS node:
+
+```python
+from ipfs_dict_chain import connect
+
+connect(host='ipfs.example.com', port=5001)
+```
+
 ### IPFSDict
 
 IPFSDict is a dictionary-like object that stores its data on IPFS. Here's an example of how to use IPFSDict:
