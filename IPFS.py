@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 import asyncio
 import json
-import os
 import aioipfs
 from multiaddr import Multiaddr
 from typing import Dict
-from contextlib import contextmanager
 
 DEFAULT_HOST = '127.0.0.1'
 DEFAULT_PORT = 5001
 multi_address = Multiaddr(f'/ip4/{DEFAULT_HOST}/tcp/{DEFAULT_PORT}')
+
+event_loop = asyncio.get_event_loop()
 
 
 def connect(host: str, port: int) -> None:
@@ -60,18 +60,6 @@ class IPFSCache:
 ipfs_cache = IPFSCache()
 
 
-@contextmanager
-def event_loop():
-    """Context manager for managing an asyncio event loop."""
-    loop = asyncio.new_event_loop()
-    try:
-        yield loop
-    except Exception as e:
-        print(f'Error in event loop: {e}')
-    finally:
-        loop.close()
-
-
 async def get_file_content(cid: str) -> str:
     """Retrieve the content of a file from IPFS by its Content Identifier (CID).
 
@@ -82,15 +70,10 @@ async def get_file_content(cid: str) -> str:
     """
     client = aioipfs.AsyncIPFS(maddr=multi_address)
 
-    await client.get(cid, dstdir='.')
+    content = await client.cat(cid)
     await client.close()
 
-    with open(cid, 'r') as f:
-        data = f.read()
-
-    os.remove(cid)
-
-    return data
+    return content.decode()
 
 
 async def _add_json(data: Dict) -> str:
@@ -147,8 +130,7 @@ def add_json(data: Dict) -> str:
     :return: The Content Identifier (CID) of the added JSON data.
     :rtype: str
     """
-    with event_loop() as loop:
-        cid = loop.run_until_complete(_add_json(data=data))
+    cid = event_loop.run_until_complete(_add_json(data=data))
     return cid
 
 
@@ -160,6 +142,5 @@ def get_json(cid: str) -> Dict:
     :return: The JSON data retrieved from IPFS.
     :rtype: Dict
     """
-    with event_loop() as loop:
-        json_data = loop.run_until_complete(_get_json(cid=cid))
+    json_data = event_loop.run_until_complete(_get_json(cid=cid))
     return json_data
