@@ -77,3 +77,8 @@ If you'd like to contribute to the ipfs_dict_chain package, please submit a pull
 ## License
 
 This package is released under the [MIT License](LICENSE).
+
+## Authors
+
+- Wouter Glorieux - [Twitter](https://twitter.com/WouterGlorieux)
+- Serendipity - AI Assistant
