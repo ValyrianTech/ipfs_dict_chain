@@ -73,3 +73,23 @@ class IPFSDictChain(IPFSDict):
             depth += 1
 
         return previous_states
+
+    def get_previous_cids(self, max_depth: Optional[int] = None) -> List[str]:
+        """Returns a list of previous CIDs.
+
+        :param max_depth: The maximum number of previous CIDs to return, defaults to None
+        :type max_depth: Optional[int], optional
+        :return: A list of previous CIDs
+        :rtype: List[str]
+        """
+        previous_cids = []
+        current_cid = self.previous_cid
+        depth = 0
+
+        while current_cid is not None and (max_depth is None or depth < max_depth):
+            previous_cids.append(current_cid)
+            previous_state = IPFSDictChain(cid=current_cid)
+            current_cid = previous_state.previous_cid
+            depth += 1
+
+        return previous_cids
