@@ -27,7 +27,7 @@ class TestIPFSDictChain(unittest.TestCase):
         ipfs_dict_chain = IPFSDictChain()
         ipfs_dict_chain['key'] = 'value'
         ipfs_dict_chain.save()
-        dict1 = ipfs_dict_chain.items()
+        dict1 = dict(ipfs_dict_chain.items())
         ipfs_dict_chain['key'] = 'new_value'
         ipfs_dict_chain.save()
         previous_states = ipfs_dict_chain.get_previous_states()

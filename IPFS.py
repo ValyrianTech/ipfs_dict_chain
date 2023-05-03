@@ -10,8 +10,6 @@ DEFAULT_HOST = '127.0.0.1'
 DEFAULT_PORT = 5001
 multi_address = Multiaddr(f'/ip4/{DEFAULT_HOST}/tcp/{DEFAULT_PORT}')
 
-event_loop = asyncio.get_event_loop()
-
 
 def connect(host: str, port: int) -> None:
     """Connect to an IPFS daemon.
@@ -130,7 +128,9 @@ def add_json(data: Dict) -> str:
     :return: The Content Identifier (CID) of the added JSON data.
     :rtype: str
     """
+    event_loop = asyncio.new_event_loop()
     cid = event_loop.run_until_complete(_add_json(data=data))
+    event_loop.close()
     return cid
 
 
@@ -142,5 +142,7 @@ def get_json(cid: str) -> Dict:
     :return: The JSON data retrieved from IPFS.
     :rtype: Dict
     """
+    event_loop = asyncio.new_event_loop()
     json_data = event_loop.run_until_complete(_get_json(cid=cid))
+    event_loop.close()
     return json_data

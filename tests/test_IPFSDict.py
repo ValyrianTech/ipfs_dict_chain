@@ -15,7 +15,7 @@ class TestIPFSDict(unittest.TestCase):
     def test_items(self):
         ipfs_dict = IPFSDict()
         ipfs_dict.key = "value"
-        self.assertEqual(ipfs_dict.items(), {"key": "value"})
+        self.assertEqual(ipfs_dict.items(), [('key', 'value')])
 
     def test_cid(self):
         ipfs_dict = IPFSDict(cid="QmV5mPAcGoqegJnzFheED2pnef96633jSjimR2SSgu7ZV5")

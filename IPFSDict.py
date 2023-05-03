@@ -1,4 +1,4 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List, Tuple
 
 from IPFS import IPFSError, add_json, get_json
 from CID import CID
@@ -18,13 +18,13 @@ class IPFSDict(Dict):
         if self._cid is not None:
             self.load(cid=self._cid)
 
-    def items(self) -> Dict[str, Any]:
-        """Get the dictionary data. This is a dictionary with all the data except values that start with an underscore.
+    def items(self) -> List[Tuple[str, Any]]:
+        """Get the dictionary data. This is a list of key-value pairs with all the data except values that start with an underscore.
 
         :return: The dictionary data
-        :rtype: Dict[str, Any]
+        :rtype: List[Tuple[str, Any]]
         """
-        return {key: value for key, value in self.__dict__.items() if key[0] != '_'}
+        return [(key, value) for key, value in self.__dict__.items() if key[0] != '_']
 
     def cid(self) -> str:
         """Get the IPFS content identifier (CID) of the dictionary data.
@@ -40,7 +40,7 @@ class IPFSDict(Dict):
         :return: The new CID
         :rtype: str
         """
-        self._cid = add_json(data=self.items())
+        self._cid = add_json(data=dict(self.items()))
         return self._cid
 
     def load(self, cid: str) -> None:
@@ -60,6 +60,7 @@ class IPFSDict(Dict):
             raise IPFSError(f'Can not retrieve IPFS data of {cid}: {e}')
 
         if not isinstance(data, dict):
+            print(data)
             raise IPFSError(f'IPFS cid {cid} does not contain a dict!')
 
         self._cid = CID(cid).__str__()

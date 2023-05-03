@@ -23,7 +23,7 @@ class IPFSDictChain(IPFSDict):
         :rtype: str
         """
         self.previous_cid = self._cid
-        self._cid = add_json(data=self.items())
+        self._cid = add_json(data=dict(self.items()))
         return self._cid
 
     def changes(self) -> Dict[str, Dict[str, Any]]:
@@ -33,7 +33,7 @@ class IPFSDictChain(IPFSDict):
         :rtype: Dict[str, Dict[str, Any]]
         """
         if self.previous_cid is not None:
-            old_data = IPFSDictChain(cid=self.previous_cid).items()
+            old_data = dict(IPFSDictChain(cid=self.previous_cid).items())
 
             changes = {
                 key: {'old': old_data[key], 'new': self.__getattribute__(key)}
@@ -44,13 +44,13 @@ class IPFSDictChain(IPFSDict):
             changes.update(
                 {
                     key: {'new': self.__getattribute__(key)}
-                    for key in self.items()
+                    for key in dict(self.items())
                     if key not in old_data
                 }
             )
 
         else:
-            changes = {key: {'new': self.__getattribute__(key)} for key in self.items()}
+            changes = {key: {'new': self.__getattribute__(key)} for key in dict(self.items())}
 
         return changes
 

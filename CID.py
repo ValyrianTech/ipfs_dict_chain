@@ -9,7 +9,7 @@ class CID:
     :param value: The CID value as a string.
     """
 
-    CID_REGEX = re.compile(r'^(/ipfs/)?[A-Za-z0-9]+$')
+    CID_REGEX = re.compile(r'^(/ipfs/)?[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$')
 
     def __init__(self, value: str) -> None:
         if not isinstance(value, str) or not self.CID_REGEX.match(value):
