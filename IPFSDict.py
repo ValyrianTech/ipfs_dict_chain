@@ -4,7 +4,7 @@ from IPFS import IPFSError, add_json, get_json
 from CID import CID
 
 
-class IPFSDict:
+class IPFSDict(Dict):
     """A dictionary-like object that stores its data on IPFS.
 
     :param cid: The IPFS content identifier (CID) of the dictionary data, defaults to None
@@ -12,13 +12,14 @@ class IPFSDict:
     """
 
     def __init__(self, cid: Optional[str] = None):
+        super().__init__()
         self._cid = CID(cid).__str__() if cid is not None else None
 
         if self._cid is not None:
             self.load(cid=self._cid)
 
-    def get(self) -> Dict[str, Any]:
-        """Get the dictionary data.
+    def items(self) -> Dict[str, Any]:
+        """Get the dictionary data. This is a dictionary with all the data except values that start with an underscore.
 
         :return: The dictionary data
         :rtype: Dict[str, Any]
@@ -39,7 +40,7 @@ class IPFSDict:
         :return: The new CID
         :rtype: str
         """
-        self._cid = add_json(data=self.get())
+        self._cid = add_json(data=self.items())
         return self._cid
 
     def load(self, cid: str) -> None:

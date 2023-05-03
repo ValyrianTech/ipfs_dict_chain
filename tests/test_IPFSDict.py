@@ -12,10 +12,10 @@ class TestIPFSDict(unittest.TestCase):
         ipfs_dict = IPFSDict(cid="QmV5mPAcGoqegJnzFheED2pnef96633jSjimR2SSgu7ZV5")
         self.assertEqual(ipfs_dict.cid(), "/ipfs/QmV5mPAcGoqegJnzFheED2pnef96633jSjimR2SSgu7ZV5")
 
-    def test_get(self):
+    def test_items(self):
         ipfs_dict = IPFSDict()
         ipfs_dict.key = "value"
-        self.assertEqual(ipfs_dict.get(), {"key": "value"})
+        self.assertEqual(ipfs_dict.items(), {"key": "value"})
 
     def test_cid(self):
         ipfs_dict = IPFSDict(cid="QmV5mPAcGoqegJnzFheED2pnef96633jSjimR2SSgu7ZV5")
