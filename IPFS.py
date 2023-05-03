@@ -18,9 +18,14 @@ def connect(host: str, port: int) -> None:
     :type host: str
     :param port: The port of the IPFS daemon.
     :type port: int
+    :raises IPFSError: If the connection to the IPFS daemon fails.
     """
     global multi_address
     multi_address = Multiaddr(f'/ip4/{host}/tcp/{port}')
+    try:
+        _ = add_json(data={'key': 'value'})
+    except Exception as e:
+        raise IPFSError(f'Failed to connect to IPFS daemon at {multi_address}: {e}')
 
 
 class IPFSError(Exception):

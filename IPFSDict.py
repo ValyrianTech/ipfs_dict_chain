@@ -60,7 +60,6 @@ class IPFSDict(Dict):
             raise IPFSError(f'Can not retrieve IPFS data of {cid}: {e}')
 
         if not isinstance(data, dict):
-            print(data)
             raise IPFSError(f'IPFS cid {cid} does not contain a dict!')
 
         self._cid = CID(cid).__str__()

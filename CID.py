@@ -31,6 +31,10 @@ class CID:
             return False
         return self.value == other.value
 
+    def __ne__(self, other: Any) -> bool:
+        """Return True if the other object is not a CID or has a different value, False otherwise."""
+        return not self.__eq__(other)
+
     def __hash__(self) -> int:
         """Return the hash value of the CID object."""
         return hash(self.value)
