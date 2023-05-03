@@ -8,9 +8,21 @@ from multiaddr import Multiaddr
 from typing import Dict
 from contextlib import contextmanager
 
-HOST = '127.0.0.1'
-PORT = 5001
-multi_address = Multiaddr(f'/ip4/{HOST}/tcp/{PORT}')
+DEFAULT_HOST = '127.0.0.1'
+DEFAULT_PORT = 5001
+multi_address = Multiaddr(f'/ip4/{DEFAULT_HOST}/tcp/{DEFAULT_PORT}')
+
+
+def connect(host: str, port: int) -> None:
+    """Connect to an IPFS daemon.
+
+    :param host: The host of the IPFS daemon.
+    :type host: str
+    :param port: The port of the IPFS daemon.
+    :type port: int
+    """
+    global multi_address
+    multi_address = Multiaddr(f'/ip4/{host}/tcp/{port}')
 
 
 class IPFSError(Exception):
@@ -27,20 +39,20 @@ class IPFSCache:
     def get(self, cid: str) -> Dict:
         """Retrieve data from the cache by its Content Identifier (CID).
 
-        Args:
-            cid (str): The Content Identifier (CID) of the data in the cache.
-
-        Returns:
-            Dict: The data retrieved from the cache.
+        :param cid: The Content Identifier (CID) of the data in the cache.
+        :type cid: str
+        :return: The data retrieved from the cache.
+        :rtype: Dict
         """
         return self._cache.get(cid)
 
     def set(self, cid: str, data: Dict) -> None:
         """Store data in the cache with its Content Identifier (CID).
 
-        Args:
-            cid (str): The Content Identifier (CID) of the data.
-            data (Dict): The data to be stored in the cache.
+        :param cid: The Content Identifier (CID) of the data.
+        :type cid: str
+        :param data: The data to be stored in the cache.
+        :type data: Dict
         """
         self._cache[cid] = data
 
@@ -63,11 +75,10 @@ def event_loop():
 async def get_file_content(cid: str) -> str:
     """Retrieve the content of a file from IPFS by its Content Identifier (CID).
 
-    Args:
-        cid (str): The Content Identifier (CID) of the file in IPFS.
-
-    Returns:
-        str: The content of the file.
+    :param cid: The Content Identifier (CID) of the file in IPFS.
+    :type cid: str
+    :return: The content of the file.
+    :rtype: str
     """
     client = aioipfs.AsyncIPFS(maddr=multi_address)
 
@@ -85,11 +96,10 @@ async def get_file_content(cid: str) -> str:
 async def _add_json(data: Dict) -> str:
     """Add JSON data to IPFS and return its Content Identifier (CID).
 
-    Args:
-        data (Dict): The JSON data to be added to IPFS.
-
-    Returns:
-        str: The Content Identifier (CID) of the added JSON data.
+    :param data: The JSON data to be added to IPFS.
+    :type data: Dict
+    :return: The Content Identifier (CID) of the added JSON data.
+    :rtype: str
     """
     client = aioipfs.AsyncIPFS(maddr=multi_address)
 
@@ -106,11 +116,10 @@ async def _add_json(data: Dict) -> str:
 async def _get_json(cid: str) -> Dict:
     """Retrieve JSON data from IPFS by its Content Identifier (CID) and cache the result.
 
-    Args:
-        cid (str): The Content Identifier (CID) of the JSON data in IPFS.
-
-    Returns:
-        Dict: The JSON data retrieved from IPFS.
+    :param cid: The Content Identifier (CID) of the JSON data in IPFS.
+    :type cid: str
+    :return: The JSON data retrieved from IPFS.
+    :rtype: Dict
     """
     cached_data = ipfs_cache.get(cid)
     if cached_data:
@@ -133,11 +142,10 @@ async def _get_json(cid: str) -> Dict:
 def add_json(data: Dict) -> str:
     """Add JSON data to IPFS and return its Content Identifier (CID) using a synchronous wrapper.
 
-    Args:
-        data (Dict): The JSON data to be added to IPFS.
-
-    Returns:
-        str: The Content Identifier (CID) of the added JSON data.
+    :param data: The JSON data to be added to IPFS.
+    :type data: Dict
+    :return: The Content Identifier (CID) of the added JSON data.
+    :rtype: str
     """
     with event_loop() as loop:
         cid = loop.run_until_complete(_add_json(data=data))
@@ -147,11 +155,10 @@ def add_json(data: Dict) -> str:
 def get_json(cid: str) -> Dict:
     """Retrieve JSON data from IPFS by its Content Identifier (CID) using a synchronous wrapper.
 
-    Args:
-        cid (str): The Content Identifier (CID) of the JSON data in IPFS.
-
-    Returns:
-        Dict: The JSON data retrieved from IPFS.
+    :param cid: The Content Identifier (CID) of the JSON data in IPFS.
+    :type cid: str
+    :return: The JSON data retrieved from IPFS.
+    :rtype: Dict
     """
     with event_loop() as loop:
         json_data = loop.run_until_complete(_get_json(cid=cid))
