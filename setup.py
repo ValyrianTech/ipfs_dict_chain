@@ -7,7 +7,7 @@ setup(
     author='Wouter Glorieux',
     author_email='info@valyrian.tech',
     url='https://github.com/ValyrianTech/ipfs_dict_chain',
-    packages=find_packages(),
+    packages=['ipfs_dict_chain'],
     install_requires=[
         'aioipfs>=0.6.3',
         'multiaddr>=0.0.9',
