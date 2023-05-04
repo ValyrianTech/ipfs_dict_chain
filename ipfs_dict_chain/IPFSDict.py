@@ -1,7 +1,7 @@
 from typing import Optional, Dict, Any, List, Tuple
 
-from IPFS import IPFSError, add_json, get_json
-from CID import CID
+from .IPFS import IPFSError, add_json, get_json
+from .CID import CID
 
 
 class IPFSDict(Dict):

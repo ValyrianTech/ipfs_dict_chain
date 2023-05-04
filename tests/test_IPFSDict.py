@@ -1,6 +1,6 @@
 import unittest
-from IPFSDict import IPFSDict
-from IPFS import IPFSError
+from ipfs_dict_chain.IPFSDict import IPFSDict
+from ipfs_dict_chain.IPFS import IPFSError
 
 
 class TestIPFSDict(unittest.TestCase):

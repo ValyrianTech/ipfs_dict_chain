@@ -1,7 +1,7 @@
 from typing import Optional, Dict, Any, List
 
-from IPFS import add_json
-from IPFSDict import IPFSDict
+from .IPFS import add_json
+from .IPFSDict import IPFSDict
 
 
 class IPFSDictChain(IPFSDict):

@@ -1,5 +1,5 @@
 import unittest
-from IPFSDictChain import IPFSDictChain
+from ipfs_dict_chain.IPFSDictChain import IPFSDictChain
 
 
 class TestIPFSDictChain(unittest.TestCase):
