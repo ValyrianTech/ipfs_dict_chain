@@ -67,3 +67,6 @@ class IPFSDict(Dict):
         for key, value in data.items():
             if key != '_cid':
                 self.__setattr__(key, value)
+
+    def __str__(self) -> str:
+        return str(dict(self.items()))

@@ -22,7 +22,7 @@ If your IPFS node is not running on localhost on the default port, you must firs
 ```python
 from ipfs_dict_chain.IPFS import connect
 
-connect(host='ipfs.example.com', port=5001)
+connect(host='127.0.0.1', port=5001)
 ```
 
 ### IPFSDict
@@ -35,7 +35,7 @@ from ipfs_dict_chain.IPFSDict import IPFSDict
 my_dict = IPFSDict()
 
 # Add data to the dictionary
-my_dict['key'] = 'value'
+my_dict.key = 'value'
 
 # Save the dictionary to IPFS
 cid = my_dict.save()
@@ -44,7 +44,7 @@ cid = my_dict.save()
 loaded_dict = IPFSDict(cid=cid)
 
 # Access the data
-print(loaded_dict['key'])  # Output: 'value'
+print(loaded_dict.key)  # Output: 'value'
 ```
 
 ### IPFSDictChain
@@ -57,7 +57,7 @@ from ipfs_dict_chain.IPFSDictChain import IPFSDictChain
 my_chain = IPFSDictChain()
 
 # Add data to the dictionary
-my_chain['key'] = 'value'
+my_chain.key = 'value'
 
 # Save the current state of the dictionary to IPFS
 cid = my_chain.save()
@@ -66,7 +66,7 @@ cid = my_chain.save()
 loaded_chain = IPFSDictChain(cid=cid)
 
 # Access the data
-print(loaded_chain['key'])  # Output: 'value'
+print(loaded_chain.key)  # Output: 'value'
 
 # Get the changes between the current state and the previous state
 changes = loaded_chain.changes()
