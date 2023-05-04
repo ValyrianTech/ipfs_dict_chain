@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='ipfs_dict_chain',
-    version='1.0.2',
+    version='1.0.3',
     description='A Python package that provides IPFSDict and IPFSDictChain objects, which are dictionary-like data structures that store their state on IPFS and keep track of changes.',
     author='Wouter Glorieux',
     author_email='info@valyrian.tech',
