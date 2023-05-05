@@ -34,8 +34,9 @@ from ipfs_dict_chain.IPFSDict import IPFSDict
 
 my_dict = IPFSDict()
 
-# Add data to the dictionary
-my_dict.key = 'value'
+# Add data to the dictionary, you can use both dot notation and bracket notation
+my_dict.my_key1 = 'value1'
+my_dict['my_key2'] = 'value2'
 
 # Save the dictionary to IPFS
 cid = my_dict.save()
@@ -44,7 +45,7 @@ cid = my_dict.save()
 loaded_dict = IPFSDict(cid=cid)
 
 # Access the data
-print(loaded_dict.key)  # Output: 'value'
+print(loaded_dict.my_key1)  # Output: 'value1'
 ```
 
 ### IPFSDictChain
@@ -56,26 +57,33 @@ from ipfs_dict_chain.IPFSDictChain import IPFSDictChain
 
 my_chain = IPFSDictChain()
 
-# Add data to the dictionary
-my_chain.key = 'value'
+# Add data to the dictionary, you can use both dot notation and bracket notation
+my_chain.my_key1 = 'value1'
+my_chain['my_key2'] = 'value2'
 
 # Save the current state of the dictionary to IPFS
-cid = my_chain.save()
+cid1 = my_chain.save()
+
+my_chain.my_key1 = 'value1_changed'
+cid2 = my_chain.save()
 
 # Load the dictionary from IPFS
-loaded_chain = IPFSDictChain(cid=cid)
+loaded_chain = IPFSDictChain(cid=cid2)
 
 # Access the data
-print(loaded_chain.key)  # Output: 'value'
+print(loaded_chain.my_key1)  # Output: 'value1_changed'
 
 # Get the changes between the current state and the previous state
 changes = loaded_chain.changes()
+print(changes)  # Output: {'previous_cid': {'old': None, 'new': 'QmSdydVMD2E7taf42gwQNhakBAc379u8y9X4Kbyoig36Fs'}, 'my_key1': {'old': 'value1', 'new': 'value1_changed'}}
 
 # Get the previous states of the dictionary
 previous_states = loaded_chain.get_previous_states()
+print(previous_states)  # Output: [{'previous_cid': None, 'my_key1': 'value1', 'my_key2': 'value2'}]
 
 # Get the previous CIDs of the dictionary
 previous_cids = loaded_chain.get_previous_cids()
+print(previous_cids)  # Output: ['QmSdydVMD2E7taf42gwQNhakBAc379u8y9X4Kbyoig36Fs']
 ```
 
 ## Contributing
