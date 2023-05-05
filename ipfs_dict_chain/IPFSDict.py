@@ -69,4 +69,29 @@ class IPFSDict(Dict):
                 self.__setattr__(key, value)
 
     def __str__(self) -> str:
+        """Convert the IPFSDict object to a string representation.
+
+        :return: The string representation of the IPFSDict object
+        :rtype: str
+        """
         return str(dict(self.items()))
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        """Set the value of the given key in the IPFSDict object.
+
+        :param key: The key to set the value for
+        :type key: str
+        :param value: The value to set
+        :type value: Any
+        """
+        self.__setattr__(key, value)
+
+    def __getitem__(self, key: str) -> Any:
+        """Get the value of the given key in the IPFSDict object.
+
+        :param key: The key to get the value for
+        :type key: str
+        :return: The value of the given key
+        :rtype: Any
+        """
+        return self.__getattribute__(key)

@@ -21,7 +21,7 @@ class TestIPFSDictChain(unittest.TestCase):
         ipfs_dict_chain['key'] = 'new_value'
         ipfs_dict_chain.save()
         changes = ipfs_dict_chain.changes()
-        self.assertEqual(changes, {'previous_cid': {'old': None, 'new': 'QmQDvMjHHichd3EERWyzmRFdEe2m3ZoKq6HgFynSn9UW1C'}})
+        self.assertEqual(changes, {'previous_cid': {'old': None, 'new': 'QmNqXUYiiNMFXKy5rYFfs1tFASH6kgMA4fA1JwRoGuam8D'}, 'key': {'old': 'value', 'new': 'new_value'}})
 
     def test_get_previous_states(self):
         ipfs_dict_chain = IPFSDictChain()
