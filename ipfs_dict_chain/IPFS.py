@@ -145,6 +145,10 @@ def get_json(cid: str) -> Dict:
     :return: The JSON data retrieved from IPFS.
     :rtype: Dict
     """
+    cached_data = ipfs_cache.get(cid)
+    if cached_data:
+        return cached_data
+
     event_loop = asyncio.new_event_loop()
     json_data = event_loop.run_until_complete(_get_json(cid=cid))
     event_loop.close()
