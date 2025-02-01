@@ -19,13 +19,21 @@ pip install ipfs_dict_chain
 
 ## Usage
 
-If your IPFS node is not running on localhost on the default port, you must first connect to your IPFS node:
+By default, ipfs_dict_chain will attempt to connect to an IPFS node running on localhost (127.0.0.1) on port 5001. If your IPFS node is running with these default settings, you can start using the package immediately.
+
+If your IPFS node is running on a different host or port, you must first connect to it using the `connect()` function:
 
 ```python
 from ipfs_dict_chain.IPFS import connect
 
-connect(host='127.0.0.1', port=5001)
+# Connect to a local IPFS node on a different port
+connect(host='127.0.0.1', port=8080)
+
+# Or connect to a remote IPFS node
+connect(host='192.168.1.100', port=5001)
 ```
+
+The `connect()` function will test the connection by attempting to add a small test object to IPFS. If the connection fails, it will raise an `IPFSError` with details about the connection failure.
 
 ### IPFSDict
 
