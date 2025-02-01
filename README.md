@@ -14,7 +14,7 @@ ipfs_dict_chain is a Python package that provides IPFSDict and IPFSDictChain obj
 To install the ipfs_dict_chain package, run the following command:
 
 ```bash
-pip install ipfs_dict_chain
+pip install ipfs-dict-chain
 ```
 
 ## Usage
