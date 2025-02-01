@@ -4,8 +4,10 @@ ipfs_dict_chain is a Python package that provides IPFSDict and IPFSDictChain obj
 
 ## Requirements
 
-- Python 3.10
+- Python >= 3.10
 - An IPFS node
+- aioipfs >= 0.6.3
+- multiaddr >= 0.0.9
 
 ## Installation
 

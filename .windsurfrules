@@ -1,7 +1,7 @@
 project:
   name: ipfs_dict_chain
   description: A Python package providing dictionary-like data structures that store their state on IPFS and track changes
-  version: 1.0.6
+  version: 1.0.7
   requirements:
     - Python >= 3.10
     - IPFS node
