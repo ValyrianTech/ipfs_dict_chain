@@ -1,0 +1,56 @@
+project:
+  name: ipfs_dict_chain
+  description: A Python package providing dictionary-like data structures that store their state on IPFS and track changes
+  version: 1.0.6
+  requirements:
+    - Python >= 3.10
+    - IPFS node
+    - aioipfs >= 0.6.3
+    - multiaddr >= 0.0.9
+
+structure:
+  core_modules:
+    ipfs_dict_chain/:
+      - CID.py: Content Identifier handling and validation
+      - IPFS.py: IPFS connectivity and operations
+      - IPFSDict.py: IPFS-backed dictionary implementation
+      - IPFSDictChain.py: Chain-based dictionary with history tracking
+      - __init__.py: Package initialization
+
+  tests:
+    tests/:
+      - test_CID.py: CID functionality tests
+      - test_IPFS.py: IPFS operations tests
+      - test_IPFSDict.py: IPFSDict implementation tests
+      - test_IPFSDictChain.py: IPFSDictChain functionality tests
+      - __init__.py: Test package initialization
+
+  configuration:
+    root/:
+      - setup.py: Package installation and dependencies
+      - MANIFEST.in: Package manifest configuration
+      - README.md: Project documentation
+      - LICENSE: MIT License
+      - .gitignore: Git ignore rules
+      - .windsurfrules: Project rules and structure
+
+  ci_cd:
+    .github/workflows/:
+      - tests.yml: GitHub Actions workflow for automated testing
+
+development_rules:
+  - All tests must pass before pushing changes
+  - Use package-relative imports (from ipfs_dict_chain.xxx import yyy)
+  - Maintain Python 3.10 compatibility
+  - Follow existing code style and patterns (PEP 8)
+  - Use type hints and annotations
+  - Use Sphinx for documentation
+  - Update README.md as needed
+  - Use a testdriven development (TDD) approach
+
+key_features:
+  - Store dictionary data on IPFS
+  - Track state changes in a chain-like structure
+  - Support for both dot notation and bracket notation
+  - Automatic IPFS content addressing
+  - History tracking and state retrieval
