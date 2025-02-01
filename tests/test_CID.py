@@ -1,5 +1,5 @@
 import unittest
-from CID import CID
+from ipfs_dict_chain.CID import CID
 
 
 class TestCID(unittest.TestCase):

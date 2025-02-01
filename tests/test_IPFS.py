@@ -1,5 +1,5 @@
 import unittest
-from IPFS import IPFSCache, add_json, get_json
+from ipfs_dict_chain.IPFS import IPFSCache, add_json, get_json
 
 
 class TestIPFSCache(unittest.TestCase):
