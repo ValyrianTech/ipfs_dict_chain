@@ -23,7 +23,7 @@ Features
 Requirements
 -----------
 
-* Python >= 3.10 (Type hints and other modern Python features are used extensively)
+* Python >= 3.10
 * IPFS node
 * aioipfs >= 0.6.3
 * multiaddr >= 0.0.9
