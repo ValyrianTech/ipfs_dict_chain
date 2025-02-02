@@ -1,9 +1,15 @@
 from setuptools import setup
 
+# Read README.md for the long description
+with open("README.md", "r", encoding="utf-8") as fh:
+    long_description = fh.read()
+
 setup(
     name='ipfs_dict_chain',
-    version='1.0.7',
+    version='1.0.8',
     description='A Python package that provides IPFSDict and IPFSDictChain objects, which are dictionary-like data structures that store their state on IPFS and keep track of changes.',
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     author='Wouter Glorieux',
     author_email='info@valyrian.tech',
     url='https://github.com/ValyrianTech/ipfs_dict_chain',
