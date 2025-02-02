@@ -96,6 +96,25 @@ previous_cids = loaded_chain.get_previous_cids()
 print(previous_cids)  # Output: ['QmSdydVMD2E7taf42gwQNhakBAc379u8y9X4Kbyoig36Fs']
 ```
 
+## Documentation
+
+The documentation is built using Sphinx and can be found at [GitHub Pages](https://valyriantech.github.io/ipfs_dict_chain/).
+
+To build the documentation locally:
+
+1. Install the documentation dependencies:
+   ```bash
+   pip install sphinx sphinx-rtd-theme
+   ```
+
+2. Build the documentation:
+   ```bash
+   cd docs
+   python -m sphinx.cmd.build -b html source build/html
+   ```
+
+The documentation will be available in `docs/build/html/index.html`.
+
 ## Contributing
 
 If you'd like to contribute to the ipfs_dict_chain package, please submit a pull request, issue, or feature request on the project's GitHub repository.
