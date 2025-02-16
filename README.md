@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/ValyrianTech/ipfs_dict_chain/actions/workflows/tests.yml/badge.svg)](https://github.com/ValyrianTech/ipfs_dict_chain/actions/workflows/tests.yml)
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://valyriantech.github.io/ipfs_dict_chain/)
-[![codecov](https://img.shields.io/badge/codecov-100%25-brightgreen.svg)](https://codecov.io/gh/ValyrianTech/ipfs_dict_chain)
+[![codecov](https://codecov.io/gh/ValyrianTech/ipfs_dict_chain/branch/main/graph/badge.svg)](https://codecov.io/gh/ValyrianTech/ipfs_dict_chain)
 
 ipfs_dict_chain is a Python package that provides IPFSDict and IPFSDictChain objects, which are dictionary-like data structures that store their state on IPFS and keep track of changes, basically creating a mini-blockchain of dicts on IPFS for efficient and secure data management.
 
