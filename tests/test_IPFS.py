@@ -2,7 +2,7 @@ import unittest
 import asyncio
 import json
 from unittest.mock import patch, MagicMock, AsyncMock
-from ipfs_dict_chain.IPFS import IPFSCache, add_json, get_json, connect, IPFSError, get_file_content
+from ipfs_dict_chain.IPFS import IPFSCache, add_json, get_json, connect, IPFSError, get_file_content, _get_json
 from multiaddr.exceptions import StringParseError
 
 
@@ -131,6 +131,41 @@ class TestIPFSFunctions(unittest.TestCase):
             
             with self.assertRaises(Exception):
                 self.loop.run_until_complete(get_file_content("invalid_cid"))
+
+    def test_get_json_cache_hit(self):
+        """Test retrieving JSON data from cache using _get_json directly"""
+        from ipfs_dict_chain.IPFS import ipfs_cache
+        
+        # Prepare test data
+        test_cid = "QmTestCacheHit123"
+        test_data = {"cached": "data"}
+        
+        # Set data in cache
+        ipfs_cache.set(test_cid, test_data)
+        
+        # Retrieve data - should come from cache
+        retrieved_data = self.loop.run_until_complete(_get_json(test_cid))
+        self.assertEqual(test_data, retrieved_data)
+        
+        # Clean up
+        ipfs_cache._cache.pop(test_cid, None)
+
+    @patch('ipfs_dict_chain.IPFS.get_file_content')
+    def test_get_json_invalid_json(self, mock_get_file_content):
+        """Test _get_json with invalid JSON data"""
+        from ipfs_dict_chain.IPFS import _get_json
+        
+        # Mock get_file_content to return invalid JSON
+        mock_get_file_content.return_value = "{ invalid json }"
+        
+        # Try to get JSON data - should raise IPFSError
+        test_cid = "QmInvalidJson123"
+        with self.assertRaises(IPFSError) as context:
+            self.loop.run_until_complete(_get_json(test_cid))
+        
+        # Verify error message
+        self.assertIn("Failed to parse json data from IPFS hash", str(context.exception))
+        self.assertIn(test_cid, str(context.exception))
 
 
 class TestIPFSCacheExtended(unittest.TestCase):
