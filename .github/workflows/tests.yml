@@ -1,5 +1,6 @@
 name: Tests
 
+# Workflow for running Python tests and uploading coverage
 on:
   push:
     branches: [ main ]
