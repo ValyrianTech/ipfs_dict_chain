@@ -18,6 +18,12 @@ setup(
         'aioipfs>=0.6.3',
         'multiaddr>=0.0.9',
     ],
+    extras_require={
+        'dev': [
+            'pytest>=7.4.0',
+            'pytest-cov>=4.1.0',
+        ],
+    },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',

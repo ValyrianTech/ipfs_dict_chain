@@ -96,6 +96,34 @@ previous_cids = loaded_chain.get_previous_cids()
 print(previous_cids)  # Output: ['QmSdydVMD2E7taf42gwQNhakBAc379u8y9X4Kbyoig36Fs']
 ```
 
+## Development and Testing
+
+To install development dependencies:
+
+```bash
+pip install -e ".[dev]"
+```
+
+To run tests with coverage:
+
+```bash
+pytest
+```
+
+This will:
+- Run all tests in the `tests` directory
+- Generate a coverage report in the terminal
+- Create an HTML coverage report in the `htmlcov` directory
+
+To view specific test coverage details:
+```bash
+# View coverage in terminal with missing lines
+pytest --cov=ipfs_dict_chain --cov-report=term-missing
+
+# Generate HTML coverage report
+pytest --cov=ipfs_dict_chain --cov-report=html
+```
+
 ## Documentation
 
 The documentation is built using Sphinx and can be found at [GitHub Pages](https://valyriantech.github.io/ipfs_dict_chain/).
