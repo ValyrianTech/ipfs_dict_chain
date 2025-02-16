@@ -2,6 +2,7 @@ import unittest
 from datetime import datetime
 from ipfs_dict_chain.IPFSDict import IPFSDict
 from ipfs_dict_chain.IPFS import IPFSError
+from unittest.mock import patch
 
 
 class CustomClass:
@@ -210,6 +211,21 @@ class TestIPFSDict(unittest.TestCase):
         self.assertTrue(bool(dict(ipfs_dict1.items())))
         empty_dict = IPFSDict()
         self.assertFalse(bool(dict(empty_dict.items())))
+
+    @patch('ipfs_dict_chain.IPFSDict.get_json')
+    def test_load_non_dict_data(self, mock_get_json):
+        """Test loading data that is not a dictionary."""
+        # Mock get_json to return a non-dictionary value
+        mock_get_json.return_value = ["this", "is", "a", "list"]
+        
+        ipfs_dict = IPFSDict()
+        test_cid = "QmTestNonDictData123"
+        
+        with self.assertRaises(IPFSError) as context:
+            ipfs_dict.load(test_cid)
+        
+        self.assertIn("does not contain a dict", str(context.exception))
+        self.assertIn(test_cid, str(context.exception))
 
 
 if __name__ == '__main__':
