@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name='ipfs_dict_chain',
-    version='1.0.10',
+    version='1.1.0',
     description='A Python package that provides IPFSDict and IPFSDictChain objects, which are dictionary-like data structures that store their state on IPFS and keep track of changes.',
     long_description=long_description,
     long_description_content_type="text/markdown",
