@@ -41,23 +41,24 @@ class IPFSDictChain(IPFSDict):
         """
         if self.previous_cid is not None:
             old_data = dict(IPFSDictChain(cid=self.previous_cid))
+            current_items = dict(self.items())
 
-            changes = {
-                key: {'old': old_data[key], 'new': self.__getattribute__(key)}
-                for key in old_data
-                if old_data[key] != self.__getattribute__(key)
-            }
+            changes = {}
+            # Detect changed keys
+            for key in old_data:
+                if key in current_items:
+                    if old_data[key] != current_items[key]:
+                        changes[key] = {'old': old_data[key], 'new': current_items[key]}
+                else:
+                    # Key was deleted
+                    changes[key] = {'old': old_data[key], 'new': None}
 
-            changes.update(
-                {
-                    key: {'new': self.__getattribute__(key)}
-                    for key in dict(self)
-                    if key not in old_data
-                }
-            )
-
+            # Detect new keys
+            for key in current_items:
+                if key not in old_data:
+                    changes[key] = {'new': current_items[key]}
         else:
-            changes = {key: {'new': self.__getattribute__(key)} for key in dict(self)}
+            changes = {key: {'new': value} for key, value in dict(self.items()).items()}
 
         return changes
 
