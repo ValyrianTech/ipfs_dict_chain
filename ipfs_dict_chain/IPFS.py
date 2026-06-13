@@ -1,13 +1,28 @@
 """IPFS client utilities for adding and retrieving JSON data."""
 
 import asyncio
+import atexit
 import json
 import time
 import aioipfs
 from multiaddr import Multiaddr
 from typing import Dict, Optional, Tuple
 
-_loop = asyncio.new_event_loop()
+_loop = None
+
+def _get_loop():
+    global _loop
+    if _loop is None or _loop.is_closed():
+        _loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(_loop)
+    return _loop
+
+@atexit.register
+def _close_loop():
+    global _loop
+    if _loop is not None and not _loop.is_closed():
+        _loop.close()
+        _loop = None
 
 DEFAULT_HOST = '127.0.0.1'
 DEFAULT_PORT = 5001
@@ -26,7 +41,7 @@ def connect(host: str, port: int) -> None:
     global multi_address
     multi_address = Multiaddr(f'/ip4/{host}/tcp/{port}')
     try:
-        _ = _loop.run_until_complete(_test_connection())
+        _ = _get_loop().run_until_complete(_test_connection())
     except Exception as e:
         raise IPFSError(f'Failed to connect to IPFS daemon at {multi_address}: {e}')
 
@@ -192,7 +207,7 @@ def add_json(data: Dict) -> str:
     :return: The Content Identifier (CID) of the added JSON data.
     :rtype: str
     """
-    return _loop.run_until_complete(_add_json(data=data))
+    return _get_loop().run_until_complete(_add_json(data=data))
 
 
 def get_json(cid: str) -> Dict:
@@ -203,4 +218,4 @@ def get_json(cid: str) -> Dict:
     :return: The JSON data retrieved from IPFS.
     :rtype: Dict
     """
-    return _loop.run_until_complete(_get_json(cid=cid))
+    return _get_loop().run_until_complete(_get_json(cid=cid))
