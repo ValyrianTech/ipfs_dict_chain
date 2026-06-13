@@ -97,7 +97,10 @@ async def _add_json(data: Dict) -> str:
     finally:
         await client.close()
 
-    return response.get('Hash', None)
+    cid = response.get('Hash')
+    if cid is None:
+        raise IPFSError('IPFS response did not contain a Hash/CID')
+    return cid
 
 
 async def _get_json(cid: str) -> Dict:
