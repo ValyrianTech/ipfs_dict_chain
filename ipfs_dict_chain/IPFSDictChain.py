@@ -19,7 +19,7 @@ class IPFSDictChain(IPFSDict):
         :param cid: The IPFS CID to initialize the dictionary with, defaults to None.
         :type cid: Optional[str], optional
         """
-        self.previous_cid = None
+        self.previous_cid: Optional[str] = None
 
         super(IPFSDictChain, self).__init__(cid=cid)
 
@@ -69,7 +69,7 @@ class IPFSDictChain(IPFSDict):
         :return: A list of previous state dictionaries
         :rtype: List[Dict[str, Any]]
         """
-        previous_states = []
+        previous_states: List[Dict[str, Any]] = []
         current_cid = self.previous_cid
         depth = 0
 
@@ -89,7 +89,7 @@ class IPFSDictChain(IPFSDict):
         :return: A list of previous CIDs
         :rtype: List[str]
         """
-        previous_cids = []
+        previous_cids: List[str] = []
         current_cid = self.previous_cid
         depth = 0
 

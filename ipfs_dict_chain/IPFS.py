@@ -4,7 +4,7 @@ import asyncio
 import json
 import aioipfs
 from multiaddr import Multiaddr
-from typing import Dict
+from typing import Dict, Optional
 
 DEFAULT_HOST = '127.0.0.1'
 DEFAULT_PORT = 5001
@@ -36,11 +36,11 @@ class IPFSError(Exception):
 class IPFSCache:
     """A simple cache for IPFS data."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize an empty IPFS cache."""
-        self._cache = {}
+        self._cache: Dict[str, Dict] = {}
 
-    def get(self, cid: str) -> Dict:
+    def get(self, cid: str) -> Optional[Dict]:
         """Retrieve data from the cache by its Content Identifier (CID).
 
         :param cid: The Content Identifier (CID) of the data in the cache.

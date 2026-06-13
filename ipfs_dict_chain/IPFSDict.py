@@ -25,7 +25,7 @@ class IPFSDict(Dict):
         if self._cid is not None:
             self.load(cid=self._cid)
 
-    def items(self) -> List[Tuple[str, Any]]:
+    def items(self) -> List[Tuple[str, Any]]:  # type: ignore[override]
         """Get the dictionary data. This is a list of key-value pairs with all the data except values that start with an underscore.
 
         :return: The dictionary data
@@ -33,7 +33,7 @@ class IPFSDict(Dict):
         """
         return [(key, value) for key, value in self.__dict__.items() if key[0] != '_']
 
-    def cid(self) -> str:
+    def cid(self) -> Optional[str]:
         """Get the IPFS content identifier (CID) of the dictionary data.
 
         :return: The CID
