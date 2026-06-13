@@ -71,6 +71,24 @@ class IPFSDictChain(IPFSDict):
 
         return changes
 
+    def _get_previous_cid_for(self, cid: str) -> Optional[str]:
+        """Lightweight fetch of just the previous_cid for a given state CID.
+
+        This avoids creating a full IPFSDictChain instance which would make
+        unnecessary network calls for data we don't need.
+
+        :param cid: The CID of the state to fetch previous_cid from
+        :type cid: str
+        :return: The previous CID, or None if not found or on error
+        :rtype: Optional[str]
+        """
+        from .IPFS import get_json, IPFSError
+        try:
+            data = get_json(cid)
+        except IPFSError:
+            return None
+        return data.get('previous_cid')
+
     def get_previous_states(self, max_depth: Optional[int] = None) -> List[Dict[str, Any]]:
         """Returns a list of previous states as dictionaries.
 
@@ -97,6 +115,9 @@ class IPFSDictChain(IPFSDict):
     def get_previous_cids(self, max_depth: Optional[int] = None) -> List[str]:
         """Returns a list of previous CIDs.
 
+        Uses lightweight fetches to traverse the chain without loading
+        full state data.
+
         :param max_depth: The maximum number of previous CIDs to return, defaults to None
         :type max_depth: Optional[int], optional
         :return: A list of previous CIDs
@@ -108,11 +129,9 @@ class IPFSDictChain(IPFSDict):
 
         while current_cid is not None and (max_depth is None or depth < max_depth):
             previous_cids.append(current_cid)
-            try:
-                previous_state = IPFSDictChain(cid=current_cid)
-            except IPFSError:
+            current_cid = self._get_previous_cid_for(current_cid)
+            if current_cid is None:
                 break
-            current_cid = previous_state.previous_cid
             depth += 1
 
         return previous_cids
