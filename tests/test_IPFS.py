@@ -2,7 +2,7 @@ import unittest
 import asyncio
 import json
 from unittest.mock import patch, AsyncMock
-from ipfs_dict_chain.IPFS import IPFSCache, add_json, get_json, connect, IPFSError, get_file_content, _get_json
+from ipfs_dict_chain.IPFS import IPFSCache, add_json, get_json, connect, IPFSError, get_file_content, _get_json, _add_json, _test_connection
 from multiaddr.exceptions import StringParseError
 
 
@@ -152,6 +152,40 @@ class TestIPFSFunctions(unittest.TestCase):
         # Clean up
         ipfs_cache._cache.pop(test_cid, None)
 
+    @patch('aioipfs.AsyncIPFS')
+    def test_add_json_missing_hash(self, mock_ipfs):
+        """Test _add_json raises IPFSError when response lacks Hash key."""
+        mock_client = AsyncMock()
+        mock_client.add_json = AsyncMock(return_value={})
+        mock_client.close = AsyncMock()
+        mock_ipfs.return_value = mock_client
+
+        with self.assertRaises(IPFSError) as context:
+            self.loop.run_until_complete(_add_json({"key": "value"}))
+        self.assertIn("Hash", str(context.exception))
+
+    @patch('aioipfs.AsyncIPFS')
+    def test_test_connection_success(self, mock_ipfs):
+        """Test _test_connection returns True on successful connection."""
+        mock_client = AsyncMock()
+        mock_client.id = AsyncMock()
+        mock_client.close = AsyncMock()
+        mock_ipfs.return_value = mock_client
+
+        result = self.loop.run_until_complete(_test_connection())
+        self.assertTrue(result)
+
+    @patch('aioipfs.AsyncIPFS')
+    def test_test_connection_failure(self, mock_ipfs):
+        """Test _test_connection raises IPFSError on connection failure."""
+        mock_client = AsyncMock()
+        mock_client.id = AsyncMock(side_effect=Exception("Connection refused"))
+        mock_client.close = AsyncMock()
+        mock_ipfs.return_value = mock_client
+
+        with self.assertRaises(IPFSError):
+            self.loop.run_until_complete(_test_connection())
+
     @patch('ipfs_dict_chain.IPFS.get_file_content')
     def test_get_json_invalid_json(self, mock_get_file_content):
         """Test _get_json with invalid JSON data"""
@@ -177,6 +211,26 @@ class TestIPFSCacheExtended(unittest.TestCase):
         """Test cache miss scenario"""
         cache = IPFSCache()
         self.assertIsNone(cache.get("non_existent_cid"))
+
+    def test_cache_expiry_zero_ttl(self):
+        """Test that cache with ttl=0 expires entries immediately."""
+        cache = IPFSCache(ttl=0)
+        cache.set("test_cid", {"key": "value"})
+        self.assertIsNone(cache.get("test_cid"))
+
+    def test_cache_clear(self):
+        """Test cache clear method removes all entries."""
+        cache = IPFSCache()
+        cache.set("test_cid", {"key": "value"})
+        cache.clear()
+        self.assertIsNone(cache.get("test_cid"))
+
+    def test_cache_cleanup(self):
+        """Test cache cleanup method removes expired entries."""
+        cache = IPFSCache(ttl=0)
+        cache.set("test_cid", {"key": "value"})
+        cache.cleanup()
+        self.assertEqual(len(cache._cache), 0)
 
     def test_cache_concurrent_access(self):
         """Test concurrent access to cache"""

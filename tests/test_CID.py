@@ -89,6 +89,12 @@ def test_equality_extended():
     assert cid1 != str(cid1)
     assert cid1 is not None
 
+def test_short_cid():
+    """Test that a CID too short raises ValueError."""
+    with pytest.raises(ValueError):
+        CID('Qm12345')
+
+
 def test_collection_usage():
     """Test using CID in various Python collections."""
     cid1 = CID('QmT78zSuBmuS4z925WZfrqQ1qHaJ56DQaTfyMUF7F8ff5o')
