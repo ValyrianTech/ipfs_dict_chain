@@ -85,11 +85,11 @@ class IPFSDict(Dict):
         if not isinstance(data, dict):
             raise IPFSError(f'IPFS cid {cid} does not contain a dict!')
 
-        self._cid = CID(cid).__str__()
-
         for key, value in data.items():
             if key != '_cid':
                 super().__setitem__(key, value)
+
+        self._cid = CID(cid).__str__()
 
     def __str__(self) -> str:
         """Convert the IPFSDict object to a string representation.
