@@ -84,7 +84,10 @@ class IPFSDictChain(IPFSDict):
         depth = 0
 
         while current_cid is not None and (max_depth is None or depth < max_depth):
-            previous_state = IPFSDictChain(cid=current_cid)
+            try:
+                previous_state = IPFSDictChain(cid=current_cid)
+            except IPFSError:
+                break
             previous_states.append(dict(previous_state))
             current_cid = previous_state.previous_cid
             depth += 1
@@ -105,7 +108,10 @@ class IPFSDictChain(IPFSDict):
 
         while current_cid is not None and (max_depth is None or depth < max_depth):
             previous_cids.append(current_cid)
-            previous_state = IPFSDictChain(cid=current_cid)
+            try:
+                previous_state = IPFSDictChain(cid=current_cid)
+            except IPFSError:
+                break
             current_cid = previous_state.previous_cid
             depth += 1
 
