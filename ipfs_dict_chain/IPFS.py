@@ -2,9 +2,10 @@
 
 import asyncio
 import json
+import time
 import aioipfs
 from multiaddr import Multiaddr
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 _loop = asyncio.new_event_loop()
 
@@ -36,31 +37,63 @@ class IPFSError(Exception):
 
 
 class IPFSCache:
-    """A simple cache for IPFS data."""
+    """An in-memory cache for IPFS data with TTL-based expiration.
 
-    def __init__(self) -> None:
-        """Initialize an empty IPFS cache."""
-        self._cache: Dict[str, Dict] = {}
+    Entries are stored with an expiry timestamp. When an entry is retrieved,
+    it is checked for expiration; expired entries are automatically removed.
+    The TTL can be configured via the ``ttl`` parameter (default 300 seconds).
+    """
+
+    def __init__(self, ttl: int = 300) -> None:
+        """Initialize an empty IPFS cache.
+
+        :param ttl: Time-to-live for cache entries in seconds. Defaults to 300.
+        :type ttl: int
+        """
+        self._cache: Dict[str, Tuple[Dict, float]] = {}
+        self._ttl: int = ttl
 
     def get(self, cid: str) -> Optional[Dict]:
         """Retrieve data from the cache by its Content Identifier (CID).
 
+        Expired entries are removed and ``None`` is returned.
+
         :param cid: The Content Identifier (CID) of the data in the cache.
         :type cid: str
-        :return: The data retrieved from the cache.
-        :rtype: Dict
+        :return: The data retrieved from the cache, or ``None`` if not found or expired.
+        :rtype: Optional[Dict]
         """
-        return self._cache.get(cid)
+        entry = self._cache.get(cid)
+        if entry is None:
+            return None
+        data, expiry = entry
+        if time.time() > expiry:
+            del self._cache[cid]
+            return None
+        return data
 
     def set(self, cid: str, data: Dict) -> None:
         """Store data in the cache with its Content Identifier (CID).
+
+        The entry will expire after the configured TTL.
 
         :param cid: The Content Identifier (CID) of the data.
         :type cid: str
         :param data: The data to be stored in the cache.
         :type data: Dict
         """
-        self._cache[cid] = data
+        self._cache[cid] = (data, time.time() + self._ttl)
+
+    def clear(self) -> None:
+        """Remove all entries from the cache."""
+        self._cache.clear()
+
+    def cleanup(self) -> None:
+        """Remove all expired entries from the cache."""
+        now = time.time()
+        expired = [cid for cid, (_, expiry) in self._cache.items() if now > expiry]
+        for cid in expired:
+            del self._cache[cid]
 
 
 ipfs_cache = IPFSCache()
@@ -170,8 +203,4 @@ def get_json(cid: str) -> Dict:
     :return: The JSON data retrieved from IPFS.
     :rtype: Dict
     """
-    cached_data = ipfs_cache.get(cid)
-    if cached_data:
-        return cached_data
-
     return _loop.run_until_complete(_get_json(cid=cid))
