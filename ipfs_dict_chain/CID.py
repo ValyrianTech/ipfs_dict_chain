@@ -12,6 +12,7 @@ class CID:
     """
 
     CID_REGEX = re.compile(r'^(/ipfs/)?[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$')
+    MIN_CID_LENGTH = 46  # CIDv0 is always 46 characters (without prefix)
 
     def __init__(self, value: str) -> None:
         """Initialize the CID object.
@@ -22,6 +23,10 @@ class CID:
         """
         if not isinstance(value, str) or not self.CID_REGEX.match(value):
             raise ValueError(f'Invalid CID value: {value}')
+
+        stripped = value[6:] if value.startswith('/ipfs/') else value
+        if len(stripped) < self.MIN_CID_LENGTH:
+            raise ValueError(f'CID value too short (minimum {self.MIN_CID_LENGTH} chars): {value}')
 
         self.value = value if value.startswith('/ipfs/') else f'/ipfs/{value}'
 
