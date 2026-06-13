@@ -31,8 +31,7 @@ class IPFSDictChain(IPFSDict):
         :rtype: str
         """
         self.previous_cid = self._cid
-        self._cid = add_json(data=dict(self))
-        return self._cid
+        return super().save()
 
     def changes(self) -> Dict[str, Dict[str, Any]]:
         """Returns a dictionary containing the changes between the current state and the previous state.
