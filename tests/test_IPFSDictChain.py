@@ -205,7 +205,7 @@ class TestIPFSDictChain(unittest.TestCase):
         chain.save()
         chain['key'] = 'new_value'
         chain.save()
-        with patch('ipfs_dict_chain.IPFS.get_json', side_effect=IPFSError("Test error")):
+        with patch('ipfs_dict_chain.IPFSDict.get_json', side_effect=IPFSError("Test error")):
             cids = chain.get_previous_cids()
         self.assertEqual(len(cids), 1)
 
