@@ -1,7 +1,6 @@
 import unittest
 from datetime import datetime
 from ipfs_dict_chain.IPFSDictChain import IPFSDictChain
-from ipfs_dict_chain.IPFS import IPFSError
 
 
 class TestIPFSDictChain(unittest.TestCase):

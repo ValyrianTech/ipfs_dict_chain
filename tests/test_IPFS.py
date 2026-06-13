@@ -1,7 +1,7 @@
 import unittest
 import asyncio
 import json
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch, AsyncMock
 from ipfs_dict_chain.IPFS import IPFSCache, add_json, get_json, connect, IPFSError, get_file_content, _get_json
 from multiaddr.exceptions import StringParseError
 
