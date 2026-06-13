@@ -2,7 +2,7 @@
 
 from typing import Optional, Dict, Any, List
 
-from .IPFS import IPFSError, add_json
+from .IPFS import IPFSError, add_json, get_json
 from .IPFSDict import IPFSDict
 
 
@@ -82,7 +82,6 @@ class IPFSDictChain(IPFSDict):
         :return: The previous CID, or None if not found or on error
         :rtype: Optional[str]
         """
-        from .IPFS import get_json, IPFSError
         try:
             data = get_json(cid)
         except IPFSError:
