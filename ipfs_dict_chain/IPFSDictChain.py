@@ -19,9 +19,10 @@ class IPFSDictChain(IPFSDict):
         :param cid: The IPFS CID to initialize the dictionary with, defaults to None.
         :type cid: Optional[str], optional
         """
-        self.previous_cid: Optional[str] = None
-
         super(IPFSDictChain, self).__init__(cid=cid)
+
+        if cid is None:
+            self.previous_cid: Optional[str] = None
 
     def save(self) -> str:
         """Saves the current state of the dictionary to IPFS and returns the new CID.
