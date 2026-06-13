@@ -22,8 +22,7 @@ class IPFSDictChain(IPFSDict):
         """
         super(IPFSDictChain, self).__init__(cid=cid)
 
-        if cid is None:
-            self.previous_cid: Optional[str] = None
+        self.previous_cid: Optional[str] = self.get('previous_cid')
 
     def save(self) -> str:
         """Saves the current state of the dictionary to IPFS and returns the new CID.
