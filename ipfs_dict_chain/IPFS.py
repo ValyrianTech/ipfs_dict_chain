@@ -76,10 +76,11 @@ async def get_file_content(cid: str) -> str:
     """
     client = aioipfs.AsyncIPFS(maddr=multi_address)
 
-    content = await client.cat(cid)
-    await client.close()
-
-    return content.decode()
+    try:
+        content = await client.cat(cid)
+        return content.decode()
+    finally:
+        await client.close()
 
 
 async def _add_json(data: Dict) -> str:
