@@ -44,13 +44,15 @@ class IPFSDictChain(IPFSDict):
                 old_data = dict(IPFSDictChain(cid=self.previous_cid))
             except IPFSError:
                 # Previous state no longer available, treat all current data as new
-                changes = {key: {'new': value} for key, value in dict(self.items()).items()}
+                changes = {key: {'new': value} for key, value in dict(self.items()).items() if key != 'previous_cid'}
                 return changes
             current_items = dict(self.items())
 
             changes = {}
             # Detect changed keys
             for key in old_data:
+                if key == 'previous_cid':
+                    continue
                 if key in current_items:
                     if old_data[key] != current_items[key]:
                         changes[key] = {'old': old_data[key], 'new': current_items[key]}
@@ -60,10 +62,12 @@ class IPFSDictChain(IPFSDict):
 
             # Detect new keys
             for key in current_items:
+                if key == 'previous_cid':
+                    continue
                 if key not in old_data:
                     changes[key] = {'new': current_items[key]}
         else:
-            changes = {key: {'new': value} for key, value in dict(self.items()).items()}
+            changes = {key: {'new': value} for key, value in dict(self.items()).items() if key != 'previous_cid'}
 
         return changes
 
