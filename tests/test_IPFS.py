@@ -15,15 +15,17 @@ class TestIPFSConnection(unittest.TestCase):
             except StringParseError as e:
                 raise IPFSError(str(e))
 
-    def test_connect_invalid_port(self):
+    @patch('ipfs_dict_chain.IPFS._test_connection')
+    def test_connect_invalid_port(self, mock_test_connection):
         """Test connection with invalid port"""
+        mock_test_connection.side_effect = IPFSError("Connection failed")
         with self.assertRaises(IPFSError):
             connect('127.0.0.1', 9999)
 
-    @patch('ipfs_dict_chain.IPFS.add_json')
-    def test_connect_timeout(self, mock_add_json):
+    @patch('ipfs_dict_chain.IPFS._test_connection')
+    def test_connect_timeout(self, mock_test_connection):
         """Test connection timeout"""
-        mock_add_json.side_effect = TimeoutError("Connection timed out")
+        mock_test_connection.side_effect = TimeoutError("Connection timed out")
         with self.assertRaises(IPFSError):
             connect('127.0.0.1', 5001)
 
