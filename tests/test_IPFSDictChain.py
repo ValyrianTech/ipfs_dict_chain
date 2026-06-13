@@ -174,7 +174,7 @@ class TestIPFSDictChain(unittest.TestCase):
         chain.save()
         chain['key'] = 'new_value'
         chain.save()
-        with patch('ipfs_dict_chain.IPFSDict.get_json', side_effect=IPFSError("Test error")):
+        with patch('ipfs_dict_chain.IPFSDictChain.get_json', side_effect=IPFSError("Test error")):
             changes = chain.changes()
         self.assertEqual(changes, {'key': {'new': 'new_value'}})
 

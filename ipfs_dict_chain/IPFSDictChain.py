@@ -41,7 +41,7 @@ class IPFSDictChain(IPFSDict):
         """
         if self.previous_cid is not None:
             try:
-                old_data = dict(IPFSDictChain(cid=self.previous_cid))
+                old_data = get_json(self.previous_cid)
             except IPFSError:
                 # Previous state no longer available, treat all current data as new
                 changes = {key: {'new': value} for key, value in dict(self.items()).items() if key != 'previous_cid'}
