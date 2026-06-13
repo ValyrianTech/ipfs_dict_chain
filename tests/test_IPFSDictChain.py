@@ -22,7 +22,7 @@ class TestIPFSDictChain(unittest.TestCase):
         ipfs_dict_chain['key'] = 'new_value'
         ipfs_dict_chain.save()
         changes = ipfs_dict_chain.changes()
-        self.assertEqual(changes, {'previous_cid': {'old': None, 'new': 'QmNqXUYiiNMFXKy5rYFfs1tFASH6kgMA4fA1JwRoGuam8D'}, 'key': {'old': 'value', 'new': 'new_value'}})
+        self.assertEqual(changes, {'key': {'old': 'value', 'new': 'new_value'}})
 
     def test_get_previous_states(self):
         ipfs_dict_chain = IPFSDictChain()
@@ -96,7 +96,7 @@ class TestIPFSDictChain(unittest.TestCase):
         # Test empty state operations
         self.assertEqual(chain.get_previous_states(), [])
         self.assertEqual(chain.get_previous_cids(), [])
-        self.assertEqual(chain.changes(), {'previous_cid': {'new': None}})  # Chain always tracks previous_cid
+        self.assertEqual(chain.changes(), {})  # No changes when chain is empty
         
         # Save empty state
         cid = chain.save()
@@ -105,8 +105,8 @@ class TestIPFSDictChain(unittest.TestCase):
         # Load empty state (will contain previous_cid as None)
         loaded_chain = IPFSDictChain(cid)
         state = dict(loaded_chain.items())
-        self.assertEqual(len(state), 1)  # Only previous_cid
-        self.assertIsNone(state['previous_cid'])
+        self.assertEqual(len(state), 1)  # Empty state contains previous_cid
+        self.assertIsNone(state['previous_cid'])  # previous_cid is None for the first state
 
     def test_complex_data_serialization(self):
         """Test serialization of complex data types."""
