@@ -200,9 +200,7 @@ class TestIPFSDict(unittest.TestCase):
         """Test special methods."""
         ipfs_dict1 = IPFSDict()
         ipfs_dict1.key = "value"
-        cid1 = ipfs_dict1.save()
-        
-        ipfs_dict2 = IPFSDict(cid1)
+        ipfs_dict1.save()
         
         # Test string representation
         self.assertEqual(str(ipfs_dict1), str(dict(ipfs_dict1.items())))

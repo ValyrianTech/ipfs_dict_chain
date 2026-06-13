@@ -39,7 +39,7 @@ class TestIPFSDictChain(unittest.TestCase):
         ipfs_dict_chain['key'] = 'value'
         cid1 = ipfs_dict_chain.save()
         ipfs_dict_chain['key'] = 'new_value'
-        cid2 = ipfs_dict_chain.save()
+        ipfs_dict_chain.save()
         previous_cids = ipfs_dict_chain.get_previous_cids()
         self.assertEqual(previous_cids, [cid1])
 
@@ -52,7 +52,7 @@ class TestIPFSDictChain(unittest.TestCase):
         for i in range(5):
             chain.value = f"state_{i}"
             chain.counter = i
-            cid = chain.save()
+            chain.save()
             states.append(dict(chain.items()))
         
         # Test depth-limited history
@@ -158,7 +158,7 @@ class TestIPFSDictChain(unittest.TestCase):
         
         # Modify branch
         branch_chain.value = "branch_1"
-        branch_cid = branch_chain.save()
+        branch_chain.save()
         
         # Verify branch and main chain are different
         self.assertNotEqual(branch_chain.cid(), main_chain.cid())

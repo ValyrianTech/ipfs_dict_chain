@@ -354,7 +354,6 @@ class TestIPFSEndToEnd(unittest.TestCase):
         async def concurrent_ops():
             tasks = []
             for i in range(5):
-                data = {"index": i, **self.test_data}
                 # Mock the add_json result
                 cid = f"test_cid_{i}"
                 tasks.append(asyncio.create_task(get_file_content(cid)))
