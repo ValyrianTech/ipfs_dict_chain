@@ -20,9 +20,9 @@ def _get_loop():
 @atexit.register
 def _close_loop():
     global _loop
-    if _loop is not None and not _loop.is_closed():
-        _loop.close()
-        _loop = None
+    if _loop is not None and not _loop.is_closed():  # pragma: no cover
+        _loop.close()  # pragma: no cover
+        _loop = None  # pragma: no cover
 
 DEFAULT_HOST = '127.0.0.1'
 DEFAULT_PORT = 5001
