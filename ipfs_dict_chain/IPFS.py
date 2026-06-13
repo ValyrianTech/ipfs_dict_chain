@@ -6,6 +6,8 @@ import aioipfs
 from multiaddr import Multiaddr
 from typing import Dict, Optional
 
+_loop = asyncio.new_event_loop()
+
 DEFAULT_HOST = '127.0.0.1'
 DEFAULT_PORT = 5001
 multi_address = Multiaddr(f'/ip4/{DEFAULT_HOST}/tcp/{DEFAULT_PORT}')
@@ -23,7 +25,7 @@ def connect(host: str, port: int) -> None:
     global multi_address
     multi_address = Multiaddr(f'/ip4/{host}/tcp/{port}')
     try:
-        _ = add_json(data={'key': 'value'})
+        _ = _loop.run_until_complete(_test_connection())
     except Exception as e:
         raise IPFSError(f'Failed to connect to IPFS daemon at {multi_address}: {e}')
 
@@ -129,6 +131,25 @@ async def _get_json(cid: str) -> Dict:
     return json_data
 
 
+async def _test_connection() -> bool:
+    """Test the connection to the IPFS daemon using a read-only operation.
+
+    :return: True if the connection is successful.
+    :rtype: bool
+    :raises IPFSError: If the connection test fails.
+    """
+    client = aioipfs.AsyncIPFS(maddr=multi_address)
+
+    try:
+        await client.id()
+    except Exception as e:
+        raise IPFSError(f'Failed to connect to IPFS daemon at {multi_address}: {e}')
+    finally:
+        await client.close()
+
+    return True
+
+
 def add_json(data: Dict) -> str:
     """Add JSON data to IPFS and return its Content Identifier (CID) using a synchronous wrapper.
 
@@ -137,10 +158,7 @@ def add_json(data: Dict) -> str:
     :return: The Content Identifier (CID) of the added JSON data.
     :rtype: str
     """
-    event_loop = asyncio.new_event_loop()
-    cid = event_loop.run_until_complete(_add_json(data=data))
-    event_loop.close()
-    return cid
+    return _loop.run_until_complete(_add_json(data=data))
 
 
 def get_json(cid: str) -> Dict:
@@ -155,7 +173,4 @@ def get_json(cid: str) -> Dict:
     if cached_data:
         return cached_data
 
-    event_loop = asyncio.new_event_loop()
-    json_data = event_loop.run_until_complete(_get_json(cid=cid))
-    event_loop.close()
-    return json_data
+    return _loop.run_until_complete(_get_json(cid=cid))
