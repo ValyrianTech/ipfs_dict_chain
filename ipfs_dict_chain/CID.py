@@ -1,3 +1,5 @@
+"""Content Identifier (CID) representation for IPFS."""
+
 import re
 from typing import Any
 
@@ -12,6 +14,12 @@ class CID:
     CID_REGEX = re.compile(r'^(/ipfs/)?[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$')
 
     def __init__(self, value: str) -> None:
+        """Initialize the CID object.
+
+        :param value: The CID value as a string.
+        :type value: str
+        :raises ValueError: If the provided value is not a valid CID string.
+        """
         if not isinstance(value, str) or not self.CID_REGEX.match(value):
             raise ValueError(f'Invalid CID value: {value}')
 

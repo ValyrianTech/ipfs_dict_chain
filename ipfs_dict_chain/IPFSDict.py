@@ -1,3 +1,5 @@
+"""Dictionary-like object that stores its data on IPFS."""
+
 from typing import Optional, Dict, Any, List, Tuple
 
 from .IPFS import IPFSError, add_json, get_json
@@ -12,6 +14,11 @@ class IPFSDict(Dict):
     """
 
     def __init__(self, cid: Optional[str] = None):
+        """Initialize the IPFSDict object.
+
+        :param cid: The IPFS content identifier (CID) of the dictionary data, defaults to None.
+        :type cid: Optional[str], optional
+        """
         super().__init__()
         self._cid = CID(cid).__str__() if cid is not None else None
 

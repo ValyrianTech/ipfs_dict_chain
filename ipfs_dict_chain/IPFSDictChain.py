@@ -1,3 +1,5 @@
+"""Dictionary-like data structure that stores its state on IPFS and keeps track of changes."""
+
 from typing import Optional, Dict, Any, List
 
 from .IPFS import add_json
@@ -12,6 +14,11 @@ class IPFSDictChain(IPFSDict):
     """
 
     def __init__(self, cid: Optional[str] = None):
+        """Initialize the IPFSDictChain object.
+
+        :param cid: The IPFS CID to initialize the dictionary with, defaults to None.
+        :type cid: Optional[str], optional
+        """
         self.previous_cid = None
 
         super(IPFSDictChain, self).__init__(cid=cid)

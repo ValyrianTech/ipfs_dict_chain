@@ -1,3 +1,5 @@
+"""IPFS client utilities for adding and retrieving JSON data."""
+
 import asyncio
 import json
 import aioipfs
@@ -35,6 +37,7 @@ class IPFSCache:
     """A simple cache for IPFS data."""
 
     def __init__(self):
+        """Initialize an empty IPFS cache."""
         self._cache = {}
 
     def get(self, cid: str) -> Dict:
