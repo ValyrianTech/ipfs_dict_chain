@@ -162,7 +162,7 @@ class TestIPFSDict(unittest.TestCase):
         with self.assertRaises(AttributeError):
             _ = ipfs_dict.nonexistent
         
-        with self.assertRaises(AttributeError):  # Changed from KeyError to match actual behavior
+        with self.assertRaises(KeyError):
             _ = ipfs_dict['nonexistent']
         
         # Test invalid attribute names

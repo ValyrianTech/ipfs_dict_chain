@@ -101,4 +101,7 @@ class IPFSDict(Dict):
         :return: The value of the given key
         :rtype: Any
         """
-        return self.__getattribute__(key)
+        try:
+            return self.__getattribute__(key)
+        except AttributeError:
+            raise KeyError(key)
