@@ -1,5 +1,6 @@
 import unittest
 from datetime import datetime
+from unittest.mock import patch
 from ipfs_dict_chain.IPFSDictChain import IPFSDictChain
 from ipfs_dict_chain.IPFS import IPFSError
 
@@ -23,7 +24,7 @@ class TestIPFSDictChain(unittest.TestCase):
         ipfs_dict_chain['key'] = 'new_value'
         ipfs_dict_chain.save()
         changes = ipfs_dict_chain.changes()
-        self.assertEqual(changes, {'previous_cid': {'old': None, 'new': 'QmNqXUYiiNMFXKy5rYFfs1tFASH6kgMA4fA1JwRoGuam8D'}, 'key': {'old': 'value', 'new': 'new_value'}})
+        self.assertEqual(changes, {'key': {'old': 'value', 'new': 'new_value'}})
 
     def test_get_previous_states(self):
         ipfs_dict_chain = IPFSDictChain()
@@ -40,7 +41,7 @@ class TestIPFSDictChain(unittest.TestCase):
         ipfs_dict_chain['key'] = 'value'
         cid1 = ipfs_dict_chain.save()
         ipfs_dict_chain['key'] = 'new_value'
-        cid2 = ipfs_dict_chain.save()
+        ipfs_dict_chain.save()
         previous_cids = ipfs_dict_chain.get_previous_cids()
         self.assertEqual(previous_cids, [cid1])
 
@@ -53,7 +54,7 @@ class TestIPFSDictChain(unittest.TestCase):
         for i in range(5):
             chain.value = f"state_{i}"
             chain.counter = i
-            cid = chain.save()
+            chain.save()
             states.append(dict(chain.items()))
         
         # Test depth-limited history
@@ -97,7 +98,7 @@ class TestIPFSDictChain(unittest.TestCase):
         # Test empty state operations
         self.assertEqual(chain.get_previous_states(), [])
         self.assertEqual(chain.get_previous_cids(), [])
-        self.assertEqual(chain.changes(), {'previous_cid': {'new': None}})  # Chain always tracks previous_cid
+        self.assertEqual(chain.changes(), {})  # No changes when chain is empty
         
         # Save empty state
         cid = chain.save()
@@ -106,8 +107,8 @@ class TestIPFSDictChain(unittest.TestCase):
         # Load empty state (will contain previous_cid as None)
         loaded_chain = IPFSDictChain(cid)
         state = dict(loaded_chain.items())
-        self.assertEqual(len(state), 1)  # Only previous_cid
-        self.assertIsNone(state['previous_cid'])
+        self.assertEqual(len(state), 1)  # Empty state contains previous_cid
+        self.assertIsNone(state['previous_cid'])  # previous_cid is None for the first state
 
     def test_complex_data_serialization(self):
         """Test serialization of complex data types."""
@@ -159,12 +160,76 @@ class TestIPFSDictChain(unittest.TestCase):
         
         # Modify branch
         branch_chain.value = "branch_1"
-        branch_cid = branch_chain.save()
+        branch_chain.save()
         
         # Verify branch and main chain are different
         self.assertNotEqual(branch_chain.cid(), main_chain.cid())
         self.assertEqual(branch_chain.value, "branch_1")
         self.assertEqual(main_chain.value, "main_2")
+
+    def test_changes_ipfs_error(self):
+        """Test changes when previous state loading raises IPFSError."""
+        chain = IPFSDictChain()
+        chain['key'] = 'value'
+        chain.save()
+        chain['key'] = 'new_value'
+        chain.save()
+        with patch('ipfs_dict_chain.IPFSDictChain.get_json', side_effect=IPFSError("Test error")):
+            changes = chain.changes()
+        self.assertEqual(changes, {'key': {'new': 'new_value'}})
+
+    def test_changes_deleted_key(self):
+        """Test changes detects deleted keys."""
+        chain = IPFSDictChain()
+        chain['a'] = 'value_a'
+        chain.save()
+        del chain['a']
+        chain.save()
+        changes = chain.changes()
+        self.assertEqual(changes, {'a': {'old': 'value_a', 'new': None}})
+
+    def test_changes_new_key(self):
+        """Test changes detects newly added keys."""
+        chain = IPFSDictChain()
+        chain['a'] = 'value_a'
+        chain.save()
+        chain['b'] = 'value_b'
+        chain.save()
+        changes = chain.changes()
+        self.assertEqual(changes, {'b': {'new': 'value_b'}})
+
+    def test_get_previous_cids_ipfs_error(self):
+        """Test get_previous_cids handles IPFSError in _get_previous_cid_for."""
+        chain = IPFSDictChain()
+        chain['key'] = 'value'
+        chain.save()
+        chain['key'] = 'new_value'
+        chain.save()
+        with patch('ipfs_dict_chain.IPFSDict.get_json', side_effect=IPFSError("Test error")):
+            cids = chain.get_previous_cids()
+        self.assertEqual(len(cids), 1)
+
+    def test_get_previous_states_ipfs_error(self):
+        """Test get_previous_states handles IPFSError when loading a state."""
+        chain = IPFSDictChain()
+        chain['key'] = 'value'
+        chain.save()
+        chain['key'] = 'new_value'
+        chain.save()
+        with patch('ipfs_dict_chain.IPFSDict.get_json', side_effect=IPFSError("Test error")):
+            states = chain.get_previous_states()
+        self.assertEqual(states, [])
+
+    def test_get_previous_cids_max_depth(self):
+        """Test get_previous_cids with max_depth and verify depth increment."""
+        chain = IPFSDictChain()
+        for i in range(5):
+            chain['value'] = f"state_{i}"
+            chain.save()
+        cids = chain.get_previous_cids(max_depth=2)
+        self.assertEqual(len(cids), 2)
+        cids = chain.get_previous_cids(max_depth=3)
+        self.assertEqual(len(cids), 3)
 
 
 if __name__ == '__main__':

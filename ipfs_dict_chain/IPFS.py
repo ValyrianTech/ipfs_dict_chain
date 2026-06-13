@@ -1,8 +1,28 @@
+"""IPFS client utilities for adding and retrieving JSON data."""
+
 import asyncio
+import atexit
 import json
+import time
 import aioipfs
 from multiaddr import Multiaddr
-from typing import Dict
+from typing import Dict, Optional, Tuple
+
+_loop = None
+
+def _get_loop():
+    global _loop
+    if _loop is None or _loop.is_closed():
+        _loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(_loop)
+    return _loop
+
+@atexit.register
+def _close_loop():
+    global _loop
+    if _loop is not None and not _loop.is_closed():  # pragma: no cover
+        _loop.close()  # pragma: no cover
+        _loop = None  # pragma: no cover
 
 DEFAULT_HOST = '127.0.0.1'
 DEFAULT_PORT = 5001
@@ -21,7 +41,7 @@ def connect(host: str, port: int) -> None:
     global multi_address
     multi_address = Multiaddr(f'/ip4/{host}/tcp/{port}')
     try:
-        _ = add_json(data={'key': 'value'})
+        _ = _get_loop().run_until_complete(_test_connection())
     except Exception as e:
         raise IPFSError(f'Failed to connect to IPFS daemon at {multi_address}: {e}')
 
@@ -32,30 +52,63 @@ class IPFSError(Exception):
 
 
 class IPFSCache:
-    """A simple cache for IPFS data."""
+    """An in-memory cache for IPFS data with TTL-based expiration.
 
-    def __init__(self):
-        self._cache = {}
+    Entries are stored with an expiry timestamp. When an entry is retrieved,
+    it is checked for expiration; expired entries are automatically removed.
+    The TTL can be configured via the ``ttl`` parameter (default 300 seconds).
+    """
 
-    def get(self, cid: str) -> Dict:
+    def __init__(self, ttl: int = 300) -> None:
+        """Initialize an empty IPFS cache.
+
+        :param ttl: Time-to-live for cache entries in seconds. Defaults to 300.
+        :type ttl: int
+        """
+        self._cache: Dict[str, Tuple[Dict, float]] = {}
+        self._ttl: int = ttl
+
+    def get(self, cid: str) -> Optional[Dict]:
         """Retrieve data from the cache by its Content Identifier (CID).
+
+        Expired entries are removed and ``None`` is returned.
 
         :param cid: The Content Identifier (CID) of the data in the cache.
         :type cid: str
-        :return: The data retrieved from the cache.
-        :rtype: Dict
+        :return: The data retrieved from the cache, or ``None`` if not found or expired.
+        :rtype: Optional[Dict]
         """
-        return self._cache.get(cid)
+        entry = self._cache.get(cid)
+        if entry is None:
+            return None
+        data, expiry = entry
+        if time.time() > expiry:
+            del self._cache[cid]
+            return None
+        return data
 
     def set(self, cid: str, data: Dict) -> None:
         """Store data in the cache with its Content Identifier (CID).
+
+        The entry will expire after the configured TTL.
 
         :param cid: The Content Identifier (CID) of the data.
         :type cid: str
         :param data: The data to be stored in the cache.
         :type data: Dict
         """
-        self._cache[cid] = data
+        self._cache[cid] = (data, time.time() + self._ttl)
+
+    def clear(self) -> None:
+        """Remove all entries from the cache."""
+        self._cache.clear()
+
+    def cleanup(self) -> None:
+        """Remove all expired entries from the cache."""
+        now = time.time()
+        expired = [cid for cid, (_, expiry) in self._cache.items() if now > expiry]
+        for cid in expired:
+            del self._cache[cid]
 
 
 ipfs_cache = IPFSCache()
@@ -71,10 +124,11 @@ async def get_file_content(cid: str) -> str:
     """
     client = aioipfs.AsyncIPFS(maddr=multi_address)
 
-    content = await client.cat(cid)
-    await client.close()
-
-    return content.decode()
+    try:
+        content = await client.cat(cid)
+        return content.decode()
+    finally:
+        await client.close()
 
 
 async def _add_json(data: Dict) -> str:
@@ -94,7 +148,10 @@ async def _add_json(data: Dict) -> str:
     finally:
         await client.close()
 
-    return response.get('Hash', None)
+    cid = response.get('Hash')
+    if cid is None:
+        raise IPFSError('IPFS response did not contain a Hash/CID')
+    return cid
 
 
 async def _get_json(cid: str) -> Dict:
@@ -123,6 +180,25 @@ async def _get_json(cid: str) -> Dict:
     return json_data
 
 
+async def _test_connection() -> bool:
+    """Test the connection to the IPFS daemon using a read-only operation.
+
+    :return: True if the connection is successful.
+    :rtype: bool
+    :raises IPFSError: If the connection test fails.
+    """
+    client = aioipfs.AsyncIPFS(maddr=multi_address)
+
+    try:
+        await client.id()
+    except Exception as e:
+        raise IPFSError(f'Failed to connect to IPFS daemon at {multi_address}: {e}')
+    finally:
+        await client.close()
+
+    return True
+
+
 def add_json(data: Dict) -> str:
     """Add JSON data to IPFS and return its Content Identifier (CID) using a synchronous wrapper.
 
@@ -131,10 +207,7 @@ def add_json(data: Dict) -> str:
     :return: The Content Identifier (CID) of the added JSON data.
     :rtype: str
     """
-    event_loop = asyncio.new_event_loop()
-    cid = event_loop.run_until_complete(_add_json(data=data))
-    event_loop.close()
-    return cid
+    return _get_loop().run_until_complete(_add_json(data=data))
 
 
 def get_json(cid: str) -> Dict:
@@ -145,11 +218,4 @@ def get_json(cid: str) -> Dict:
     :return: The JSON data retrieved from IPFS.
     :rtype: Dict
     """
-    cached_data = ipfs_cache.get(cid)
-    if cached_data:
-        return cached_data
-
-    event_loop = asyncio.new_event_loop()
-    json_data = event_loop.run_until_complete(_get_json(cid=cid))
-    event_loop.close()
-    return json_data
+    return _get_loop().run_until_complete(_get_json(cid=cid))

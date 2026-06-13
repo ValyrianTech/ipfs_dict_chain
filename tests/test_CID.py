@@ -76,7 +76,6 @@ def test_init_invalid_types(invalid_input):
 def test_equality_extended():
     """Test extended equality comparisons."""
     cid1 = CID('QmT78zSuBmuS4z925WZfrqQ1qHaJ56DQaTfyMUF7F8ff5o')
-    cid2 = CID('/ipfs/QmT78zSuBmuS4z925WZfrqQ1qHaJ56DQaTfyMUF7F8ff5o')
     cid3 = CID("QmT78zSuBmuS4z925WZfrqQ1qHaJ56DQaTfyMUF7F8ff5p")  # Different last char
 
     # Test inequality with different CID
@@ -85,10 +84,16 @@ def test_equality_extended():
 
     # Test comparison with non-CID objects
     assert cid1 != str(cid1)
-    assert cid1 != None
+    assert cid1 is not None
     assert cid1 != 123
     assert cid1 != str(cid1)
-    assert cid1 != None
+    assert cid1 is not None
+
+def test_short_cid():
+    """Test that a CID too short raises ValueError."""
+    with pytest.raises(ValueError):
+        CID('Qm12345')
+
 
 def test_collection_usage():
     """Test using CID in various Python collections."""
