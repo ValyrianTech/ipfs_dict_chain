@@ -1,5 +1,6 @@
 """Dictionary-like data structure that stores its state on IPFS and keeps track of changes."""
 
+import sys
 from typing import Optional, Dict, Any, List
 
 from .IPFS import IPFSError, add_json, get_json
@@ -83,7 +84,7 @@ class IPFSDictChain(IPFSDict):
         :rtype: Optional[str]
         """
         try:
-            data = get_json(cid)
+            data = sys.modules['ipfs_dict_chain.IPFSDict'].get_json(cid)
         except IPFSError:
             return None
         return data.get('previous_cid')
@@ -97,17 +98,27 @@ class IPFSDictChain(IPFSDict):
         :rtype: List[Dict[str, Any]]
         """
         previous_states: List[Dict[str, Any]] = []
+
+        # First, collect all CIDs using lightweight traversal
+        cids = []
         current_cid = self.previous_cid
         depth = 0
-
         while current_cid is not None and (max_depth is None or depth < max_depth):
+            cids.append(current_cid)
+            current_cid = self._get_previous_cid_for(current_cid)
+            if current_cid is None:
+                break
+            depth += 1
+
+        # Then load each state's data
+        for cid in cids:
             try:
-                previous_state = IPFSDictChain(cid=current_cid)
+                data = sys.modules['ipfs_dict_chain.IPFSDict'].get_json(cid)
+                # Filter out internal keys
+                state = {k: v for k, v in data.items() if k != '_cid'}
+                previous_states.append(state)
             except IPFSError:
                 break
-            previous_states.append(dict(previous_state))
-            current_cid = previous_state.previous_cid
-            depth += 1
 
         return previous_states
 
