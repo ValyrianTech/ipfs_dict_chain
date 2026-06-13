@@ -2,7 +2,7 @@
 
 from typing import Optional, Dict, Any, List
 
-from .IPFS import add_json
+from .IPFS import IPFSError, add_json
 from .IPFSDict import IPFSDict
 
 
@@ -40,7 +40,12 @@ class IPFSDictChain(IPFSDict):
         :rtype: Dict[str, Dict[str, Any]]
         """
         if self.previous_cid is not None:
-            old_data = dict(IPFSDictChain(cid=self.previous_cid))
+            try:
+                old_data = dict(IPFSDictChain(cid=self.previous_cid))
+            except IPFSError:
+                # Previous state no longer available, treat all current data as new
+                changes = {key: {'new': value} for key, value in dict(self.items()).items()}
+                return changes
             current_items = dict(self.items())
 
             changes = {}
