@@ -11,6 +11,14 @@ from typing import Dict, Optional, Tuple
 _loop = None
 
 def _get_loop():
+    """Return the global asyncio event loop, creating it if necessary.
+
+    If the global event loop is ``None`` or has been closed, a new event loop
+    is created and set as the current event loop for the thread.
+
+    :returns: The global asyncio event loop.
+    :rtype: asyncio.AbstractEventLoop
+    """
     global _loop
     if _loop is None or _loop.is_closed():
         _loop = asyncio.new_event_loop()
@@ -19,6 +27,12 @@ def _get_loop():
 
 @atexit.register
 def _close_loop():
+    """Close the global asyncio event loop at interpreter shutdown.
+
+    This function is registered with :func:`atexit.register` so that the
+    event loop is properly cleaned up when the Python interpreter exits.
+    If the loop is already closed or was never created, no action is taken.
+    """
     global _loop
     if _loop is not None and not _loop.is_closed():  # pragma: no cover
         _loop.close()  # pragma: no cover
