@@ -52,7 +52,7 @@ class IPFSDict(Dict):
         :return: The dictionary data
         :rtype: List[Tuple[str, Any]]
         """
-        return [(key, value) for key, value in super().items() if key[0] != '_']
+        return [(key, value) for key, value in super().items() if not key.startswith('_')]
 
     def cid(self) -> Optional[str]:
         """Get the IPFS content identifier (CID) of the dictionary data.
