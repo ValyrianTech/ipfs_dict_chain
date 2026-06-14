@@ -13,6 +13,11 @@ class IPFSDict(Dict):
     :type cid: Optional[str], optional
     """
 
+    _DICT_METHODS = frozenset({
+        'items', 'keys', 'values', 'get', 'pop', 'update', 'clear',
+        'copy', 'fromkeys', 'setdefault', 'popitem'
+    })
+
     def __init__(self, cid: Optional[str] = None):
         """Initialize the IPFSDict object.
 
@@ -34,7 +39,7 @@ class IPFSDict(Dict):
 
     def __getattribute__(self, key: str) -> Any:
         """Get attribute, retrieving data keys from the inherited dict."""
-        if key.startswith('_'):
+        if key.startswith('_') or key in IPFSDict._DICT_METHODS:
             return super().__getattribute__(key)
         try:
             return super().__getitem__(key)
