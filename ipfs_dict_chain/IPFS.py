@@ -10,7 +10,7 @@ from typing import Dict, Optional, Tuple
 
 _loop = None
 
-def _get_loop():
+def _get_loop() -> asyncio.AbstractEventLoop:
     """Return the global asyncio event loop, creating it if necessary.
 
     If the global event loop is ``None`` or has been closed, a new event loop
@@ -26,7 +26,7 @@ def _get_loop():
     return _loop
 
 @atexit.register
-def _close_loop():
+def _close_loop() -> None:
     """Close the global asyncio event loop at interpreter shutdown.
 
     This function is registered with :func:`atexit.register` so that the
