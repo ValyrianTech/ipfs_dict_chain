@@ -79,6 +79,11 @@ class TestIPFSDict(unittest.TestCase):
         ipfs_dict['key1'] = 'new_value1'
         self.assertEqual(ipfs_dict['key1'], 'new_value1')
 
+    def test_setitem_reserved_key(self):
+        ipfs_dict = IPFSDict()
+        with self.assertRaises(KeyError):
+            ipfs_dict['_reserved'] = 'value'
+
     def test_attribute_assignment_retrieval(self):
         ipfs_dict = IPFSDict()
         ipfs_dict.key1 = 'value1'

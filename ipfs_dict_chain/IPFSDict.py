@@ -13,6 +13,11 @@ class IPFSDict(Dict):
     :type cid: Optional[str], optional
     """
 
+    _DICT_METHODS = frozenset({
+        'items', 'keys', 'values', 'get', 'pop', 'update', 'clear',
+        'copy', 'fromkeys', 'setdefault', 'popitem'
+    })
+
     def __init__(self, cid: Optional[str] = None):
         """Initialize the IPFSDict object.
 
@@ -34,7 +39,7 @@ class IPFSDict(Dict):
 
     def __getattribute__(self, key: str) -> Any:
         """Get attribute, retrieving data keys from the inherited dict."""
-        if key.startswith('_'):
+        if key.startswith('_') or key in IPFSDict._DICT_METHODS:
             return super().__getattribute__(key)
         try:
             return super().__getitem__(key)
@@ -47,7 +52,7 @@ class IPFSDict(Dict):
         :return: The dictionary data
         :rtype: List[Tuple[str, Any]]
         """
-        return [(key, value) for key, value in super().items() if key[0] != '_']
+        return [(key, value) for key, value in super().items() if not key.startswith('_')]
 
     def cid(self) -> Optional[str]:
         """Get the IPFS content identifier (CID) of the dictionary data.
@@ -107,6 +112,8 @@ class IPFSDict(Dict):
         :param value: The value to set
         :type value: Any
         """
+        if key.startswith('_'):
+            raise KeyError(f"Keys starting with '_' are reserved for internal use: {key}")
         super().__setitem__(key, value)
 
     def __getitem__(self, key: str) -> Any:

@@ -3,7 +3,7 @@
 import sys
 from typing import Optional, Dict, Any, List
 
-from .IPFS import IPFSError, add_json, get_json
+from .IPFS import IPFSError, get_json
 from .IPFSDict import IPFSDict
 
 
@@ -51,7 +51,7 @@ class IPFSDictChain(IPFSDict):
             changes = {}
             # Detect changed keys
             for key in old_data:
-                if key == 'previous_cid':
+                if key == 'previous_cid' or key.startswith('_'):
                     continue
                 if key in current_items:
                     if old_data[key] != current_items[key]:
