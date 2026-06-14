@@ -112,6 +112,8 @@ class IPFSDict(Dict):
         :param value: The value to set
         :type value: Any
         """
+        if key.startswith('_'):
+            raise KeyError(f"Keys starting with '_' are reserved for internal use: {key}")
         super().__setitem__(key, value)
 
     def __getitem__(self, key: str) -> Any:
