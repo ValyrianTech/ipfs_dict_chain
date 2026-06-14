@@ -3,7 +3,7 @@
 import sys
 from typing import Optional, Dict, Any, List
 
-from .IPFS import IPFSError, add_json, get_json
+from .IPFS import IPFSError, get_json
 from .IPFSDict import IPFSDict
 
 
