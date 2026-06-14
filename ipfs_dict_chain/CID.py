@@ -11,10 +11,6 @@ class CID:
     :param value: The CID value as a string.
     """
 
-    # CIDv0: starts with Qm, always 46 characters (base58)
-    CIDV0_REGEX = re.compile(r'^[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{46}$')
-    # CIDv1: starts with multibase prefix, then base-encoded data (variable length)
-    CIDV1_REGEX = re.compile(r'^[bBzZ9FfUV][123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+$')
     # Full CID (with optional /ipfs/ prefix)
     CID_REGEX = re.compile(r'^(/ipfs/)?([123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{46}|[bBzZ9FfUV][123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+)$')
 
