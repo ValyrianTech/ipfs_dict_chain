@@ -1,4 +1,6 @@
+# noqa: N999
 import pytest
+
 from ipfs_dict_chain.CID import CID
 
 BASE32_LOWER_CID = 'bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi'

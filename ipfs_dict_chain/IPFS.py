@@ -1,12 +1,13 @@
+# noqa: N999
 """IPFS client utilities for adding and retrieving JSON data."""
 
 import asyncio
 import atexit
 import json
 import time
+
 import aioipfs
 from multiaddr import Multiaddr
-from typing import Dict, Optional, Tuple
 
 _loop = None
 
@@ -56,13 +57,12 @@ def connect(host: str, port: int) -> None:
     multi_address = Multiaddr(f'/ip4/{host}/tcp/{port}')
     try:
         _ = _get_loop().run_until_complete(_test_connection())
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise IPFSError(f'Failed to connect to IPFS daemon at {multi_address}: {e}')
 
 
 class IPFSError(Exception):
     """Custom exception for IPFS-related errors."""
-    pass
 
 
 class IPFSCache:
@@ -79,10 +79,10 @@ class IPFSCache:
         :param ttl: Time-to-live for cache entries in seconds. Defaults to 300.
         :type ttl: int
         """
-        self._cache: Dict[str, Tuple[Dict, float]] = {}
+        self._cache: dict[str, tuple[dict, float]] = {}
         self._ttl: int = ttl
 
-    def get(self, cid: str) -> Optional[Dict]:
+    def get(self, cid: str) -> dict | None:
         """Retrieve data from the cache by its Content Identifier (CID).
 
         Expired entries are removed and ``None`` is returned.
@@ -101,7 +101,7 @@ class IPFSCache:
             return None
         return data
 
-    def set(self, cid: str, data: Dict) -> None:
+    def set(self, cid: str, data: dict) -> None:
         """Store data in the cache with its Content Identifier (CID).
 
         The entry will expire after the configured TTL.
@@ -145,7 +145,7 @@ async def get_file_content(cid: str) -> str:
         await client.close()
 
 
-async def _add_json(data: Dict) -> str:
+async def _add_json(data: dict) -> str:
     """Add JSON data to IPFS and return its Content Identifier (CID).
 
     :param data: The JSON data to be added to IPFS.
@@ -157,7 +157,7 @@ async def _add_json(data: Dict) -> str:
 
     try:
         response = await client.add_json(data=data)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise IPFSError(f'Failed to add JSON data to IPFS: {e}')
     finally:
         await client.close()
@@ -168,7 +168,7 @@ async def _add_json(data: Dict) -> str:
     return cid
 
 
-async def _get_json(cid: str) -> Dict:
+async def _get_json(cid: str) -> dict:
     """Retrieve JSON data from IPFS by its Content Identifier (CID) and cache the result.
 
     :param cid: The Content Identifier (CID) of the JSON data in IPFS.
@@ -182,12 +182,12 @@ async def _get_json(cid: str) -> Dict:
 
     try:
         data = await get_file_content(cid=cid)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise IPFSError(f'Failed to retrieve json data from IPFS hash {cid}: {e}')
 
     try:
         json_data = json.loads(data)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise IPFSError(f'Failed to parse json data from IPFS hash {cid}: {e}')
 
     ipfs_cache.set(cid, json_data)
@@ -205,7 +205,7 @@ async def _test_connection() -> bool:
 
     try:
         await client.id()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise IPFSError(f'Failed to connect to IPFS daemon at {multi_address}: {e}')
     finally:
         await client.close()
@@ -213,7 +213,7 @@ async def _test_connection() -> bool:
     return True
 
 
-def add_json(data: Dict) -> str:
+def add_json(data: dict) -> str:
     """Add JSON data to IPFS and return its Content Identifier (CID) using a synchronous wrapper.
 
     :param data: The JSON data to be added to IPFS.
@@ -224,7 +224,7 @@ def add_json(data: Dict) -> str:
     return _get_loop().run_until_complete(_add_json(data=data))
 
 
-def get_json(cid: str) -> Dict:
+def get_json(cid: str) -> dict:
     """Retrieve JSON data from IPFS by its Content Identifier (CID) using a synchronous wrapper.
 
     :param cid: The Content Identifier (CID) of the JSON data in IPFS.

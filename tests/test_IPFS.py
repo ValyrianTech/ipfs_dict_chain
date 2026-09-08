@@ -1,9 +1,22 @@
-import unittest
+# noqa: N999
 import asyncio
 import json
-from unittest.mock import patch, AsyncMock
-from ipfs_dict_chain.IPFS import IPFSCache, add_json, get_json, connect, IPFSError, get_file_content, _get_json, _add_json, _test_connection
+import unittest
+from unittest.mock import AsyncMock, patch
+
 from multiaddr.exceptions import StringParseError
+
+from ipfs_dict_chain.IPFS import (
+    IPFSCache,
+    IPFSError,
+    _add_json,
+    _get_json,
+    _test_connection,
+    add_json,
+    connect,
+    get_file_content,
+    get_json,
+)
 
 
 class TestIPFSConnection(unittest.TestCase):
@@ -131,7 +144,7 @@ class TestIPFSFunctions(unittest.TestCase):
             mock_client.close = AsyncMock()
             mock_ipfs.return_value = mock_client
             
-            with self.assertRaises(Exception):
+            with self.assertRaises(Exception):  # noqa: B017
                 self.loop.run_until_complete(get_file_content("invalid_cid"))
 
     def test_get_json_cache_hit(self):

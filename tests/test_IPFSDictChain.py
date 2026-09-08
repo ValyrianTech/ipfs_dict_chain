@@ -1,8 +1,10 @@
+# noqa: N999
 import unittest
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import patch
-from ipfs_dict_chain.IPFSDictChain import IPFSDictChain
+
 from ipfs_dict_chain.IPFS import IPFSError
+from ipfs_dict_chain.IPFSDictChain import IPFSDictChain
 
 
 class TestIPFSDictChain(unittest.TestCase):
@@ -143,7 +145,7 @@ class TestIPFSDictChain(unittest.TestCase):
         chain = IPFSDictChain()
         
         # Test with datetime
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         chain.timestamp = now.isoformat()
         
         # Test with None values

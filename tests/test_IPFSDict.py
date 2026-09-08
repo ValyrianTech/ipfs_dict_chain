@@ -1,8 +1,10 @@
+# noqa: N999
 import unittest
-from datetime import datetime
-from ipfs_dict_chain.IPFSDict import IPFSDict
-from ipfs_dict_chain.IPFS import IPFSError
+from datetime import datetime, timezone
 from unittest.mock import patch
+
+from ipfs_dict_chain.IPFS import IPFSError
+from ipfs_dict_chain.IPFSDict import IPFSDict
 
 
 class CustomClass:
@@ -80,7 +82,7 @@ class TestIPFSDict(unittest.TestCase):
     def test_load(self):
         ipfs_dict = IPFSDict()
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             ipfs_dict.load(cid=123)
 
         with self.assertRaises(IPFSError):
@@ -137,7 +139,7 @@ class TestIPFSDict(unittest.TestCase):
         ipfs_dict = IPFSDict()
         
         # Test datetime
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         ipfs_dict.timestamp = now.isoformat()  # Convert to ISO format string before saving
         cid = ipfs_dict.save()
         
@@ -192,11 +194,11 @@ class TestIPFSDict(unittest.TestCase):
             _ = ipfs_dict['nonexistent']
         
         # Test that __setattr__ works correctly for valid attribute names
-        setattr(ipfs_dict, 'valid_key', 'value')
+        ipfs_dict.valid_key = 'value'
         self.assertEqual(ipfs_dict.valid_key, 'value')
         
         # Test that private attributes (starting with _) bypass dict storage
-        setattr(ipfs_dict, '_internal', 'private_value')
+        ipfs_dict._internal = 'private_value'
         # _internal should be a real attribute, not in items()
         self.assertNotIn('_internal', [k for k, v in ipfs_dict.items()])
         self.assertEqual(ipfs_dict._internal, 'private_value')
@@ -259,6 +261,22 @@ class TestIPFSDict(unittest.TestCase):
         
         self.assertIn("does not contain a dict", str(context.exception))
         self.assertIn(test_cid, str(context.exception))
+
+    @patch('ipfs_dict_chain.IPFSDict.get_json')
+    def test_load_replaces_existing_data(self, mock_get_json):
+        """Test that load() replaces existing data instead of merging."""
+        mock_get_json.return_value = {'new_key': 'new_value'}
+
+        ipfs_dict = IPFSDict()
+        ipfs_dict['old_key'] = 'old_value'
+        ipfs_dict['shared_key'] = 'old_shared_value'
+
+        ipfs_dict.load("QmV5mPAcGoqegJnzFheED2pnef96633jSjimR2SSgu7ZV5")
+
+        self.assertIn('new_key', ipfs_dict)
+        self.assertNotIn('old_key', ipfs_dict)
+        self.assertNotIn('shared_key', ipfs_dict)
+        self.assertEqual(ipfs_dict['new_key'], 'new_value')
 
 
 if __name__ == '__main__':

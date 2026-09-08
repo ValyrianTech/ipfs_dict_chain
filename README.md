@@ -63,6 +63,8 @@ loaded_dict = IPFSDict(cid=cid)
 print(loaded_dict.my_key1)  # Output: 'value1'
 ```
 
+Note: `IPFSDict.load()` replaces any existing data with the data loaded from IPFS. Loading into an already-populated `IPFSDict` will not merge data; it clears the existing keys first.
+
 ### IPFSDictChain
 
 IPFSDictChain is a dictionary-like data structure that stores its state on IPFS and keeps track of changes. Here's an example of how to use IPFSDictChain:
