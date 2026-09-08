@@ -6,6 +6,8 @@ from unittest.mock import AsyncMock, patch
 
 from multiaddr import Multiaddr
 
+import ipfs_dict_chain.IPFS
+
 from ipfs_dict_chain.IPFS import (
     IPFSCache,
     IPFSError,
@@ -21,6 +23,12 @@ from ipfs_dict_chain.IPFS import (
 
 
 class TestIPFSConnection(unittest.TestCase):
+    def setUp(self):
+        self._original_multi_address = ipfs_dict_chain.IPFS.multi_address
+
+    def tearDown(self):
+        ipfs_dict_chain.IPFS.multi_address = self._original_multi_address
+
     def test_connect_invalid_host(self):
         """Test connection with invalid host"""
         with self.assertRaises(IPFSError):
@@ -58,16 +66,19 @@ class TestIPFSConnection(unittest.TestCase):
     def test_connect_updates_multi_address_on_success(self, mock_test_connection):
         """Test global multi_address is updated on successful connection"""
         mock_test_connection.return_value = True
-        connect('127.0.0.1', 5001)
-        self.assertEqual(multi_address, Multiaddr('/ip4/127.0.0.1/tcp/5001'))
+        connect('192.168.1.100', 5001)
+        self.assertEqual(
+            ipfs_dict_chain.IPFS.multi_address,
+            Multiaddr('/ip4/192.168.1.100/tcp/5001')
+        )
 
     @patch('ipfs_dict_chain.IPFS._test_connection')
     def test_connect_passes_new_address_to_test_connection(self, mock_test_connection):
         """Test connect() passes the new address to _test_connection."""
         mock_test_connection.return_value = True
-        connect('127.0.0.1', 5001)
+        connect('192.168.1.100', 5001)
         mock_test_connection.assert_called_once_with(
-            maddr=Multiaddr('/ip4/127.0.0.1/tcp/5001')
+            maddr=Multiaddr('/ip4/192.168.1.100/tcp/5001')
         )
 
 
