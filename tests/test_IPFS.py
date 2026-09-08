@@ -61,6 +61,15 @@ class TestIPFSConnection(unittest.TestCase):
         connect('127.0.0.1', 5001)
         self.assertEqual(multi_address, Multiaddr('/ip4/127.0.0.1/tcp/5001'))
 
+    @patch('ipfs_dict_chain.IPFS._test_connection')
+    def test_connect_passes_new_address_to_test_connection(self, mock_test_connection):
+        """Test connect() passes the new address to _test_connection."""
+        mock_test_connection.return_value = True
+        connect('127.0.0.1', 5001)
+        mock_test_connection.assert_called_once_with(
+            maddr=Multiaddr('/ip4/127.0.0.1/tcp/5001')
+        )
+
 
 class TestIPFSCache(unittest.TestCase):
 
@@ -217,6 +226,19 @@ class TestIPFSFunctions(unittest.TestCase):
 
         with self.assertRaises(IPFSError):
             self.loop.run_until_complete(_test_connection())
+
+    @patch('aioipfs.AsyncIPFS')
+    def test_test_connection_uses_passed_maddr(self, mock_ipfs):
+        """Test _test_connection uses the passed maddr parameter."""
+        mock_client = AsyncMock()
+        mock_client.id = AsyncMock()
+        mock_client.close = AsyncMock()
+        mock_ipfs.return_value = mock_client
+
+        custom_maddr = Multiaddr('/ip4/192.0.2.1/tcp/6001')
+        result = self.loop.run_until_complete(_test_connection(maddr=custom_maddr))
+        self.assertTrue(result)
+        mock_ipfs.assert_called_once_with(maddr=custom_maddr)
 
     @patch('ipfs_dict_chain.IPFS.get_file_content')
     def test_get_json_invalid_json(self, mock_get_file_content):
