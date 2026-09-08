@@ -4,7 +4,7 @@ import json
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from multiaddr.exceptions import StringParseError
+from multiaddr import Multiaddr
 
 from ipfs_dict_chain.IPFS import (
     IPFSCache,
@@ -16,6 +16,7 @@ from ipfs_dict_chain.IPFS import (
     connect,
     get_file_content,
     get_json,
+    multi_address,
 )
 
 
@@ -23,10 +24,7 @@ class TestIPFSConnection(unittest.TestCase):
     def test_connect_invalid_host(self):
         """Test connection with invalid host"""
         with self.assertRaises(IPFSError):
-            try:
-                connect('invalid_host', 5001)
-            except StringParseError as e:
-                raise IPFSError(str(e))
+            connect('invalid_host', 5001)
 
     @patch('ipfs_dict_chain.IPFS._test_connection')
     def test_connect_invalid_port(self, mock_test_connection):
@@ -41,6 +39,27 @@ class TestIPFSConnection(unittest.TestCase):
         mock_test_connection.side_effect = TimeoutError("Connection timed out")
         with self.assertRaises(IPFSError):
             connect('127.0.0.1', 5001)
+
+    @patch('ipfs_dict_chain.IPFS._test_connection')
+    def test_connect_failure_preserves_multi_address(self, mock_test_connection):
+        """Test global multi_address is not modified when connection fails"""
+        mock_test_connection.side_effect = IPFSError("Connection failed")
+        original_address = multi_address
+        with self.assertRaises(IPFSError):
+            connect('192.0.2.1', 9999)
+        self.assertEqual(multi_address, original_address)
+
+    def test_connect_catches_string_parse_error(self):
+        """Test connect catches StringParseError and raises IPFSError"""
+        with self.assertRaises(IPFSError):
+            connect('invalid_host', 5001)
+
+    @patch('ipfs_dict_chain.IPFS._test_connection')
+    def test_connect_updates_multi_address_on_success(self, mock_test_connection):
+        """Test global multi_address is updated on successful connection"""
+        mock_test_connection.return_value = True
+        connect('127.0.0.1', 5001)
+        self.assertEqual(multi_address, Multiaddr('/ip4/127.0.0.1/tcp/5001'))
 
 
 class TestIPFSCache(unittest.TestCase):
