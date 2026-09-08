@@ -3,6 +3,15 @@
 import re
 from typing import Any
 
+BASE58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+BASE58_FLICKR = '123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ'
+BASE32_LOWER = 'abcdefghijklmnopqrstuvwxyz234567'
+BASE32_UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
+BASE16_LOWER = '0123456789abcdef'
+BASE16_UPPER = '0123456789ABCDEF'
+BASE36_LOWER = '0123456789abcdefghijklmnopqrstuvwxyz'
+BASE36_UPPER = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
 
 class CID:
     """
@@ -12,7 +21,19 @@ class CID:
     """
 
     # Full CID (with optional /ipfs/ prefix)
-    CID_REGEX = re.compile(r'^(/ipfs/)?([123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{46}|[bBzZ9FfUV][123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+)$')
+    CID_REGEX = re.compile(
+        rf'^(/ipfs/)?('
+        rf'[{BASE58}]{{46}}|'
+        rf'b[{BASE32_LOWER}]+|'
+        rf'B[{BASE32_UPPER}]+|'
+        rf'z[{BASE58}]+|'
+        rf'9[{BASE58_FLICKR}]+|'
+        rf'f[{BASE16_LOWER}]+|'
+        rf'F[{BASE16_UPPER}]+|'
+        rf'U[{BASE36_UPPER}]+|'
+        rf'V[{BASE36_LOWER}]+'
+        rf')$'
+    )
 
     def __init__(self, value: str) -> None:
         """Initialize the CID object.

@@ -17,6 +17,20 @@ class TestIPFSDictChain(unittest.TestCase):
         new_cid = ipfs_dict_chain.save()
         self.assertIsNotNone(new_cid)
 
+    @patch('ipfs_dict_chain.IPFSDict.add_json')
+    def test_save_cidv1(self, mock_add_json):
+        """Test save() with a CIDv1 (base32) CID returned by the IPFS daemon."""
+        cidv1 = 'bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi'
+        mock_add_json.return_value = cidv1
+
+        chain = IPFSDictChain()
+        chain['key'] = 'value'
+        new_cid = chain.save()
+
+        self.assertEqual(new_cid, '/ipfs/' + cidv1)
+        self.assertEqual(chain.cid(), '/ipfs/' + cidv1)
+        self.assertTrue(chain.cid().startswith('/ipfs/'))
+
     def test_previous_cid_format_consistency(self):
         chain = IPFSDictChain()
         chain['key'] = 'value1'
