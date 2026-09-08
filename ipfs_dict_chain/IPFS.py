@@ -54,11 +54,12 @@ def connect(host: str, port: int) -> None:
     :raises IPFSError: If the connection to the IPFS daemon fails.
     """
     global multi_address
-    multi_address = Multiaddr(f'/ip4/{host}/tcp/{port}')
     try:
+        new_address = Multiaddr(f'/ip4/{host}/tcp/{port}')
         _ = _get_loop().run_until_complete(_test_connection())
+        multi_address = new_address  # Only update on success
     except Exception as e:  # noqa: BLE001
-        raise IPFSError(f'Failed to connect to IPFS daemon at {multi_address}: {e}')
+        raise IPFSError(f'Failed to connect to IPFS daemon at /ip4/{host}/tcp/{port}: {e}')
 
 
 class IPFSError(Exception):
