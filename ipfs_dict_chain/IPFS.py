@@ -54,11 +54,14 @@ def connect(host: str, port: int) -> None:
     :raises IPFSError: If the connection to the IPFS daemon fails.
     """
     global multi_address
-    multi_address = Multiaddr(f'/ip4/{host}/tcp/{port}')
     try:
-        _ = _get_loop().run_until_complete(_test_connection())
+        new_address = Multiaddr(f'/ip4/{host}/tcp/{port}')
+        _ = _get_loop().run_until_complete(_test_connection(maddr=new_address))
+        multi_address = new_address  # Only update on success
     except Exception as e:  # noqa: BLE001
-        raise IPFSError(f'Failed to connect to IPFS daemon at {multi_address}: {e}')
+        if isinstance(e, IPFSError):
+            raise
+        raise IPFSError(f'Failed to connect to IPFS daemon at /ip4/{host}/tcp/{port}: {e}')
 
 
 class IPFSError(Exception):
@@ -194,19 +197,22 @@ async def _get_json(cid: str) -> dict:
     return json_data
 
 
-async def _test_connection() -> bool:
+async def _test_connection(maddr: Multiaddr = multi_address) -> bool:
     """Test the connection to the IPFS daemon using a read-only operation.
 
+    :param maddr: The multiaddr of the IPFS daemon to test. Defaults to the
+        global ``multi_address``.
+    :type maddr: Multiaddr
     :return: True if the connection is successful.
     :rtype: bool
     :raises IPFSError: If the connection test fails.
     """
-    client = aioipfs.AsyncIPFS(maddr=multi_address)
+    client = aioipfs.AsyncIPFS(maddr=maddr)
 
     try:
         await client.id()
     except Exception as e:  # noqa: BLE001
-        raise IPFSError(f'Failed to connect to IPFS daemon at {multi_address}: {e}')
+        raise IPFSError(f'Failed to connect to IPFS daemon at {maddr}: {e}')
     finally:
         await client.close()
 

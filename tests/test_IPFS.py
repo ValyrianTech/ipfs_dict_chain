@@ -4,7 +4,9 @@ import json
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from multiaddr.exceptions import StringParseError
+from multiaddr import Multiaddr
+
+import ipfs_dict_chain.IPFS
 
 from ipfs_dict_chain.IPFS import (
     IPFSCache,
@@ -16,17 +18,21 @@ from ipfs_dict_chain.IPFS import (
     connect,
     get_file_content,
     get_json,
+    multi_address,
 )
 
 
 class TestIPFSConnection(unittest.TestCase):
+    def setUp(self):
+        self._original_multi_address = ipfs_dict_chain.IPFS.multi_address
+
+    def tearDown(self):
+        ipfs_dict_chain.IPFS.multi_address = self._original_multi_address
+
     def test_connect_invalid_host(self):
         """Test connection with invalid host"""
         with self.assertRaises(IPFSError):
-            try:
-                connect('invalid_host', 5001)
-            except StringParseError as e:
-                raise IPFSError(str(e))
+            connect('invalid_host', 5001)
 
     @patch('ipfs_dict_chain.IPFS._test_connection')
     def test_connect_invalid_port(self, mock_test_connection):
@@ -41,6 +47,58 @@ class TestIPFSConnection(unittest.TestCase):
         mock_test_connection.side_effect = TimeoutError("Connection timed out")
         with self.assertRaises(IPFSError):
             connect('127.0.0.1', 5001)
+
+    @patch('ipfs_dict_chain.IPFS._test_connection')
+    def test_connect_reraises_ipfserror_without_wrapping(self, mock_test_connection):
+        """Test IPFSError is re-raised directly without double wrapping."""
+        original_error = IPFSError("Failed to connect to IPFS daemon at /ip4/127.0.0.1/tcp/5001: Connection refused")
+        mock_test_connection.side_effect = original_error
+        with self.assertRaises(IPFSError) as context:
+            connect('10.0.0.1', 5001)
+        self.assertIs(context.exception, original_error)
+        self.assertNotIn(
+            "Failed to connect to IPFS daemon at /ip4/10.0.0.1/tcp/5001",
+            str(context.exception),
+        )
+
+    @patch('ipfs_dict_chain.IPFS._test_connection')
+    def test_connect_wraps_non_ipfserror(self, mock_test_connection):
+        """Test non-IPFSError is wrapped in an IPFSError."""
+        mock_test_connection.side_effect = TimeoutError("Connection timed out")
+        with self.assertRaises(IPFSError) as context:
+            connect('10.0.0.1', 5001)
+        self.assertIn(
+            "Failed to connect to IPFS daemon at /ip4/10.0.0.1/tcp/5001",
+            str(context.exception),
+        )
+
+    @patch('ipfs_dict_chain.IPFS._test_connection')
+    def test_connect_failure_preserves_multi_address(self, mock_test_connection):
+        """Test global multi_address is not modified when connection fails"""
+        mock_test_connection.side_effect = IPFSError("Connection failed")
+        original_address = multi_address
+        with self.assertRaises(IPFSError):
+            connect('192.0.2.1', 9999)
+        self.assertEqual(multi_address, original_address)
+
+    @patch('ipfs_dict_chain.IPFS._test_connection')
+    def test_connect_updates_multi_address_on_success(self, mock_test_connection):
+        """Test global multi_address is updated on successful connection"""
+        mock_test_connection.return_value = True
+        connect('192.168.1.100', 5001)
+        self.assertEqual(
+            ipfs_dict_chain.IPFS.multi_address,
+            Multiaddr('/ip4/192.168.1.100/tcp/5001')
+        )
+
+    @patch('ipfs_dict_chain.IPFS._test_connection')
+    def test_connect_passes_new_address_to_test_connection(self, mock_test_connection):
+        """Test connect() passes the new address to _test_connection."""
+        mock_test_connection.return_value = True
+        connect('192.168.1.100', 5001)
+        mock_test_connection.assert_called_once_with(
+            maddr=Multiaddr('/ip4/192.168.1.100/tcp/5001')
+        )
 
 
 class TestIPFSCache(unittest.TestCase):
@@ -198,6 +256,19 @@ class TestIPFSFunctions(unittest.TestCase):
 
         with self.assertRaises(IPFSError):
             self.loop.run_until_complete(_test_connection())
+
+    @patch('aioipfs.AsyncIPFS')
+    def test_test_connection_uses_passed_maddr(self, mock_ipfs):
+        """Test _test_connection uses the passed maddr parameter."""
+        mock_client = AsyncMock()
+        mock_client.id = AsyncMock()
+        mock_client.close = AsyncMock()
+        mock_ipfs.return_value = mock_client
+
+        custom_maddr = Multiaddr('/ip4/192.0.2.1/tcp/6001')
+        result = self.loop.run_until_complete(_test_connection(maddr=custom_maddr))
+        self.assertTrue(result)
+        mock_ipfs.assert_called_once_with(maddr=custom_maddr)
 
     @patch('ipfs_dict_chain.IPFS.get_file_content')
     def test_get_json_invalid_json(self, mock_get_file_content):

@@ -15,3 +15,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed CID format inconsistency between `IPFSDict.__init__`, `IPFSDict.load()`, and `IPFSDict.save()` methods. `save()` now returns CIDs with the `/ipfs/` prefix, consistent with the format used during initialization and loading. This prevents chain data corruption caused by inconsistent CID formats.
 - `IPFSDict.load()` now raises `TypeError` instead of `ValueError` when a non-string CID is passed.
+- `connect()` no longer modifies the global `multi_address` when the connection attempt fails; it now only updates the address after a successful connection test. It also now properly catches `StringParseError` (and other errors raised during the connection attempt) and raises `IPFSError` instead.
