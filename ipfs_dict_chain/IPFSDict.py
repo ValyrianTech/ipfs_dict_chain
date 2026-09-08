@@ -77,7 +77,7 @@ class IPFSDict(dict):
 
         :param cid: The IPFS content identifier (CID) of the dictionary data
         :type cid: str
-        :raises ValueError: If the CID is not a string
+        :raises TypeError: If the CID is not a string
         :raises IPFSError: If there is an issue retrieving the data from IPFS
         """
         if not isinstance(cid, str):
