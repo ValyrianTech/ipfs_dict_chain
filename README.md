@@ -90,7 +90,7 @@ print(loaded_chain.my_key1)  # Output: 'value1_changed'
 
 # Get the changes between the current state and the previous state
 changes = loaded_chain.changes()
-print(changes)  # Output: {'previous_cid': {'old': None, 'new': '/ipfs/QmSdydVMD2E7taf42gwQNhakBAc379u8y9X4Kbyoig36Fs'}, 'my_key1': {'old': 'value1', 'new': 'value1_changed'}}
+print(changes)  # Output: {'my_key1': {'old': 'value1', 'new': 'value1_changed'}}
 
 # Get the previous states of the dictionary
 previous_states = loaded_chain.get_previous_states()
