@@ -38,7 +38,7 @@ connect(host='127.0.0.1', port=8080)
 connect(host='192.168.1.100', port=5001)
 ```
 
-The `connect()` function will test the connection by attempting to add a small test object to IPFS. If the connection fails, it will raise an `IPFSError` with details about the connection failure.
+The `connect()` function will test the connection using a read-only operation (`client.id()`). If the connection fails, it will raise an `IPFSError` with details about the connection failure, and the global connection settings are left unchanged (i.e., `connect()` does not modify the active IPFS address on failure).
 
 ### IPFSDict
 
