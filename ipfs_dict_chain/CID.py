@@ -1,3 +1,4 @@
+# noqa: N999
 """Content Identifier (CID) representation for IPFS."""
 
 import re

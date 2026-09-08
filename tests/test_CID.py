@@ -1,3 +1,4 @@
+# noqa: N999
 import pytest
 
 from ipfs_dict_chain.CID import CID

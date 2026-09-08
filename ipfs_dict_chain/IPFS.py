@@ -1,3 +1,4 @@
+# noqa: N999
 """IPFS client utilities for adding and retrieving JSON data."""
 
 import asyncio
@@ -56,7 +57,7 @@ def connect(host: str, port: int) -> None:
     multi_address = Multiaddr(f'/ip4/{host}/tcp/{port}')
     try:
         _ = _get_loop().run_until_complete(_test_connection())
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise IPFSError(f'Failed to connect to IPFS daemon at {multi_address}: {e}')
 
 
@@ -156,7 +157,7 @@ async def _add_json(data: dict) -> str:
 
     try:
         response = await client.add_json(data=data)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise IPFSError(f'Failed to add JSON data to IPFS: {e}')
     finally:
         await client.close()
@@ -181,12 +182,12 @@ async def _get_json(cid: str) -> dict:
 
     try:
         data = await get_file_content(cid=cid)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise IPFSError(f'Failed to retrieve json data from IPFS hash {cid}: {e}')
 
     try:
         json_data = json.loads(data)
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise IPFSError(f'Failed to parse json data from IPFS hash {cid}: {e}')
 
     ipfs_cache.set(cid, json_data)
@@ -204,7 +205,7 @@ async def _test_connection() -> bool:
 
     try:
         await client.id()
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise IPFSError(f'Failed to connect to IPFS daemon at {multi_address}: {e}')
     finally:
         await client.close()

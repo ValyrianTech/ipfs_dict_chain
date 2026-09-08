@@ -1,3 +1,4 @@
+# noqa: N999
 """Dictionary-like data structure that stores its state on IPFS and keeps track of changes."""
 
 import sys
@@ -61,11 +62,11 @@ class IPFSDictChain(IPFSDict):
                     changes[key] = {'old': old_data[key], 'new': None}
 
             # Detect new keys
-            for key in current_items:
+            for key, value in current_items.items():
                 if key == 'previous_cid':
                     continue
                 if key not in old_data:
-                    changes[key] = {'new': current_items[key]}
+                    changes[key] = {'new': value}
         else:
             changes = {key: {'new': value} for key, value in dict(self.items()).items() if key != 'previous_cid'}
 

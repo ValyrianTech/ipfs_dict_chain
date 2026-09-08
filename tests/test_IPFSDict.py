@@ -1,5 +1,6 @@
+# noqa: N999
 import unittest
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import patch
 
 from ipfs_dict_chain.IPFS import IPFSError
@@ -81,7 +82,7 @@ class TestIPFSDict(unittest.TestCase):
     def test_load(self):
         ipfs_dict = IPFSDict()
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             ipfs_dict.load(cid=123)
 
         with self.assertRaises(IPFSError):
@@ -138,7 +139,7 @@ class TestIPFSDict(unittest.TestCase):
         ipfs_dict = IPFSDict()
         
         # Test datetime
-        now = datetime.now()
+        now = datetime.now(timezone.utc)
         ipfs_dict.timestamp = now.isoformat()  # Convert to ISO format string before saving
         cid = ipfs_dict.save()
         

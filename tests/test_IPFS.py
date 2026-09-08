@@ -1,3 +1,4 @@
+# noqa: N999
 import asyncio
 import json
 import unittest
@@ -143,7 +144,7 @@ class TestIPFSFunctions(unittest.TestCase):
             mock_client.close = AsyncMock()
             mock_ipfs.return_value = mock_client
             
-            with self.assertRaises(Exception):
+            with self.assertRaises(Exception):  # noqa: B017
                 self.loop.run_until_complete(get_file_content("invalid_cid"))
 
     def test_get_json_cache_hit(self):

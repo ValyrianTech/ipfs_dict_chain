@@ -1,3 +1,4 @@
+# noqa: N999
 """Dictionary-like object that stores its data on IPFS."""
 
 from typing import Any
@@ -80,7 +81,7 @@ class IPFSDict(dict):
         :raises IPFSError: If there is an issue retrieving the data from IPFS
         """
         if not isinstance(cid, str):
-            raise ValueError(f'Can not retrieve IPFS data: cid must be a string or unicode, got {type(cid)} instead')
+            raise TypeError(f'Can not retrieve IPFS data: cid must be a string or unicode, got {type(cid)} instead')
 
         try:
             data = get_json(cid=cid)
