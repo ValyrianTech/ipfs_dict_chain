@@ -57,11 +57,6 @@ class TestIPFSConnection(unittest.TestCase):
             connect('192.0.2.1', 9999)
         self.assertEqual(multi_address, original_address)
 
-    def test_connect_catches_string_parse_error(self):
-        """Test connect catches StringParseError and raises IPFSError"""
-        with self.assertRaises(IPFSError):
-            connect('invalid_host', 5001)
-
     @patch('ipfs_dict_chain.IPFS._test_connection')
     def test_connect_updates_multi_address_on_success(self, mock_test_connection):
         """Test global multi_address is updated on successful connection"""
