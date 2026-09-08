@@ -56,6 +56,27 @@ class TestIPFSDict(unittest.TestCase):
         self.assertIsNotNone(cid)
         self.assertNotEqual(cid, "")
 
+    def test_save_cid_prefix(self):
+        ipfs_dict = IPFSDict()
+        ipfs_dict.key = "value"
+        cid = ipfs_dict.save()
+        self.assertTrue(cid.startswith("/ipfs/"))
+        self.assertEqual(ipfs_dict.cid(), cid)
+        self.assertTrue(ipfs_dict.cid().startswith("/ipfs/"))
+
+    @patch('ipfs_dict_chain.IPFSDict.add_json')
+    def test_save_cidv1(self, mock_add_json):
+        """Test save() with a CIDv1 (base32) CID returned by the IPFS daemon."""
+        cidv1 = 'bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi'
+        mock_add_json.return_value = cidv1
+
+        ipfs_dict = IPFSDict()
+        ipfs_dict.key = "value"
+        cid = ipfs_dict.save()
+
+        self.assertEqual(cid, '/ipfs/' + cidv1)
+        self.assertEqual(ipfs_dict.cid(), '/ipfs/' + cidv1)
+
     def test_load(self):
         ipfs_dict = IPFSDict()
 

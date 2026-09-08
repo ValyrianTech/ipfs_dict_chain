@@ -68,7 +68,7 @@ class IPFSDict(Dict):
         :return: The new CID
         :rtype: str
         """
-        self._cid = add_json(data=dict(self))
+        self._cid = CID(add_json(data=dict(self))).__str__()
         return self._cid
 
     def load(self, cid: str) -> None:
