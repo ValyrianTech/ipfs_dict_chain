@@ -262,6 +262,21 @@ class TestIPFSDict(unittest.TestCase):
         self.assertIn("does not contain a dict", str(context.exception))
         self.assertIn(test_cid, str(context.exception))
 
+    @patch('ipfs_dict_chain.IPFSDict.get_json')
+    def test_load_replaces_existing_data(self, mock_get_json):
+        """Test that load() replaces existing data instead of merging."""
+        mock_get_json.return_value = {'new_key': 'new_value'}
+
+        ipfs_dict = IPFSDict()
+        ipfs_dict['old_key'] = 'old_value'
+        ipfs_dict['shared_key'] = 'old_shared_value'
+
+        ipfs_dict.load("QmV5mPAcGoqegJnzFheED2pnef96633jSjimR2SSgu7ZV5")
+
+        self.assertIn('new_key', ipfs_dict)
+        self.assertNotIn('old_key', ipfs_dict)
+        self.assertEqual(ipfs_dict['new_key'], 'new_value')
+
 
 if __name__ == '__main__':
     unittest.main()

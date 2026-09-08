@@ -91,6 +91,9 @@ class IPFSDict(dict):
         if not isinstance(data, dict):
             raise IPFSError(f'IPFS cid {cid} does not contain a dict!')
 
+        # Clear existing data before loading new data
+        super().clear()
+
         for key, value in data.items():
             if key != '_cid':
                 super().__setitem__(key, value)
