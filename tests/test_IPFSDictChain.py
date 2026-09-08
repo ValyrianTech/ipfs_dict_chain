@@ -17,6 +17,20 @@ class TestIPFSDictChain(unittest.TestCase):
         new_cid = ipfs_dict_chain.save()
         self.assertIsNotNone(new_cid)
 
+    def test_previous_cid_format_consistency(self):
+        chain = IPFSDictChain()
+        chain['key'] = 'value1'
+        cid1 = chain.save()
+        chain['key'] = 'value2'
+        cid2 = chain.save()
+
+        self.assertTrue(cid1.startswith('/ipfs/'))
+        self.assertTrue(chain.previous_cid.startswith('/ipfs/'))
+
+        loaded_chain = IPFSDictChain(cid2)
+        self.assertTrue(loaded_chain.previous_cid.startswith('/ipfs/'))
+        self.assertEqual(loaded_chain.previous_cid, cid1)
+
     def test_changes(self):
         ipfs_dict_chain = IPFSDictChain()
         ipfs_dict_chain['key'] = 'value'

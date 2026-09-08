@@ -56,6 +56,14 @@ class TestIPFSDict(unittest.TestCase):
         self.assertIsNotNone(cid)
         self.assertNotEqual(cid, "")
 
+    def test_save_cid_prefix(self):
+        ipfs_dict = IPFSDict()
+        ipfs_dict.key = "value"
+        cid = ipfs_dict.save()
+        self.assertTrue(cid.startswith("/ipfs/"))
+        self.assertEqual(ipfs_dict.cid(), cid)
+        self.assertTrue(ipfs_dict.cid().startswith("/ipfs/"))
+
     def test_load(self):
         ipfs_dict = IPFSDict()
 
