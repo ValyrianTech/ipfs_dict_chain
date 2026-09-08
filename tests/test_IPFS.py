@@ -49,6 +49,30 @@ class TestIPFSConnection(unittest.TestCase):
             connect('127.0.0.1', 5001)
 
     @patch('ipfs_dict_chain.IPFS._test_connection')
+    def test_connect_reraises_ipfserror_without_wrapping(self, mock_test_connection):
+        """Test IPFSError is re-raised directly without double wrapping."""
+        original_error = IPFSError("Failed to connect to IPFS daemon at /ip4/127.0.0.1/tcp/5001: Connection refused")
+        mock_test_connection.side_effect = original_error
+        with self.assertRaises(IPFSError) as context:
+            connect('10.0.0.1', 5001)
+        self.assertIs(context.exception, original_error)
+        self.assertNotIn(
+            "Failed to connect to IPFS daemon at /ip4/10.0.0.1/tcp/5001",
+            str(context.exception),
+        )
+
+    @patch('ipfs_dict_chain.IPFS._test_connection')
+    def test_connect_wraps_non_ipfserror(self, mock_test_connection):
+        """Test non-IPFSError is wrapped in an IPFSError."""
+        mock_test_connection.side_effect = TimeoutError("Connection timed out")
+        with self.assertRaises(IPFSError) as context:
+            connect('10.0.0.1', 5001)
+        self.assertIn(
+            "Failed to connect to IPFS daemon at /ip4/10.0.0.1/tcp/5001",
+            str(context.exception),
+        )
+
+    @patch('ipfs_dict_chain.IPFS._test_connection')
     def test_connect_failure_preserves_multi_address(self, mock_test_connection):
         """Test global multi_address is not modified when connection fails"""
         mock_test_connection.side_effect = IPFSError("Connection failed")
