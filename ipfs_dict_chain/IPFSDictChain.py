@@ -1,7 +1,7 @@
 """Dictionary-like data structure that stores its state on IPFS and keeps track of changes."""
 
 import sys
-from typing import Optional, Dict, Any, List
+from typing import Any
 
 from .IPFS import IPFSError, get_json
 from .IPFSDict import IPFSDict
@@ -14,15 +14,15 @@ class IPFSDictChain(IPFSDict):
     :type cid: Optional[str], optional
     """
 
-    def __init__(self, cid: Optional[str] = None):
+    def __init__(self, cid: str | None = None):
         """Initialize the IPFSDictChain object.
 
         :param cid: The IPFS CID to initialize the dictionary with, defaults to None.
         :type cid: Optional[str], optional
         """
-        super(IPFSDictChain, self).__init__(cid=cid)
+        super().__init__(cid=cid)
 
-        self.previous_cid: Optional[str] = self.get('previous_cid')
+        self.previous_cid: str | None = self.get('previous_cid')
 
     def save(self) -> str:
         """Saves the current state of the dictionary to IPFS and returns the new CID.
@@ -33,7 +33,7 @@ class IPFSDictChain(IPFSDict):
         self.previous_cid = self._cid
         return super().save()
 
-    def changes(self) -> Dict[str, Dict[str, Any]]:
+    def changes(self) -> dict[str, dict[str, Any]]:
         """Returns a dictionary containing the changes between the current state and the previous state.
 
         :return: A dictionary of changes, with keys as attribute names and values as dictionaries containing the old and new values
@@ -71,7 +71,7 @@ class IPFSDictChain(IPFSDict):
 
         return changes
 
-    def _get_previous_cid_for(self, cid: str) -> Optional[str]:
+    def _get_previous_cid_for(self, cid: str) -> str | None:
         """Lightweight fetch of just the previous_cid for a given state CID.
 
         This avoids creating a full IPFSDictChain instance which would make
@@ -88,7 +88,7 @@ class IPFSDictChain(IPFSDict):
             return None
         return data.get('previous_cid')
 
-    def get_previous_states(self, max_depth: Optional[int] = None) -> List[Dict[str, Any]]:
+    def get_previous_states(self, max_depth: int | None = None) -> list[dict[str, Any]]:
         """Returns a list of previous states as dictionaries.
 
         :param max_depth: The maximum number of previous states to return, defaults to None
@@ -96,7 +96,7 @@ class IPFSDictChain(IPFSDict):
         :return: A list of previous state dictionaries
         :rtype: List[Dict[str, Any]]
         """
-        previous_states: List[Dict[str, Any]] = []
+        previous_states: list[dict[str, Any]] = []
 
         # First, collect all CIDs using lightweight traversal
         cids = []
@@ -121,7 +121,7 @@ class IPFSDictChain(IPFSDict):
 
         return previous_states
 
-    def get_previous_cids(self, max_depth: Optional[int] = None) -> List[str]:
+    def get_previous_cids(self, max_depth: int | None = None) -> list[str]:
         """Returns a list of previous CIDs.
 
         Uses lightweight fetches to traverse the chain without loading
@@ -132,7 +132,7 @@ class IPFSDictChain(IPFSDict):
         :return: A list of previous CIDs
         :rtype: List[str]
         """
-        previous_cids: List[str] = []
+        previous_cids: list[str] = []
         current_cid = self.previous_cid
         depth = 0
 

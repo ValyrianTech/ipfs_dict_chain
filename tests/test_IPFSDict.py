@@ -1,8 +1,9 @@
 import unittest
 from datetime import datetime
-from ipfs_dict_chain.IPFSDict import IPFSDict
-from ipfs_dict_chain.IPFS import IPFSError
 from unittest.mock import patch
+
+from ipfs_dict_chain.IPFS import IPFSError
+from ipfs_dict_chain.IPFSDict import IPFSDict
 
 
 class CustomClass:
@@ -192,11 +193,11 @@ class TestIPFSDict(unittest.TestCase):
             _ = ipfs_dict['nonexistent']
         
         # Test that __setattr__ works correctly for valid attribute names
-        setattr(ipfs_dict, 'valid_key', 'value')
+        ipfs_dict.valid_key = 'value'
         self.assertEqual(ipfs_dict.valid_key, 'value')
         
         # Test that private attributes (starting with _) bypass dict storage
-        setattr(ipfs_dict, '_internal', 'private_value')
+        ipfs_dict._internal = 'private_value'
         # _internal should be a real attribute, not in items()
         self.assertNotIn('_internal', [k for k, v in ipfs_dict.items()])
         self.assertEqual(ipfs_dict._internal, 'private_value')

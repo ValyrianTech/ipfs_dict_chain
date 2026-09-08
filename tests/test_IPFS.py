@@ -1,9 +1,21 @@
-import unittest
 import asyncio
 import json
-from unittest.mock import patch, AsyncMock
-from ipfs_dict_chain.IPFS import IPFSCache, add_json, get_json, connect, IPFSError, get_file_content, _get_json, _add_json, _test_connection
+import unittest
+from unittest.mock import AsyncMock, patch
+
 from multiaddr.exceptions import StringParseError
+
+from ipfs_dict_chain.IPFS import (
+    IPFSCache,
+    IPFSError,
+    _add_json,
+    _get_json,
+    _test_connection,
+    add_json,
+    connect,
+    get_file_content,
+    get_json,
+)
 
 
 class TestIPFSConnection(unittest.TestCase):

@@ -1,12 +1,12 @@
 """Dictionary-like object that stores its data on IPFS."""
 
-from typing import Optional, Dict, Any, List, Tuple
+from typing import Any
 
-from .IPFS import IPFSError, add_json, get_json
 from .CID import CID
+from .IPFS import IPFSError, add_json, get_json
 
 
-class IPFSDict(Dict):
+class IPFSDict(dict):
     """A dictionary-like object that stores its data on IPFS.
 
     :param cid: The IPFS content identifier (CID) of the dictionary data, defaults to None
@@ -18,7 +18,7 @@ class IPFSDict(Dict):
         'copy', 'fromkeys', 'setdefault', 'popitem'
     })
 
-    def __init__(self, cid: Optional[str] = None):
+    def __init__(self, cid: str | None = None):
         """Initialize the IPFSDict object.
 
         :param cid: The IPFS content identifier (CID) of the dictionary data, defaults to None.
@@ -46,7 +46,7 @@ class IPFSDict(Dict):
         except KeyError:
             return super().__getattribute__(key)
 
-    def items(self) -> List[Tuple[str, Any]]:  # type: ignore[override]
+    def items(self) -> list[tuple[str, Any]]:  # type: ignore[override]
         """Get the dictionary data. This is a list of key-value pairs with all the data except values that start with an underscore.
 
         :return: The dictionary data
@@ -54,7 +54,7 @@ class IPFSDict(Dict):
         """
         return [(key, value) for key, value in super().items() if not key.startswith('_')]
 
-    def cid(self) -> Optional[str]:
+    def cid(self) -> str | None:
         """Get the IPFS content identifier (CID) of the dictionary data.
 
         :return: The CID

@@ -1,8 +1,9 @@
 import unittest
 from datetime import datetime
 from unittest.mock import patch
-from ipfs_dict_chain.IPFSDictChain import IPFSDictChain
+
 from ipfs_dict_chain.IPFS import IPFSError
+from ipfs_dict_chain.IPFSDictChain import IPFSDictChain
 
 
 class TestIPFSDictChain(unittest.TestCase):

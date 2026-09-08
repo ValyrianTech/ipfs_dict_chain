@@ -1,7 +1,6 @@
 """Content Identifier (CID) representation for IPFS."""
 
 import re
-from typing import Any
 
 BASE58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 BASE58_FLICKR = '123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ'
@@ -55,13 +54,13 @@ class CID:
         """Return a more informative representation of the CID object."""
         return f"CID('{self.value}')"
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Return True if the other object is a CID with the same value, False otherwise."""
         if not isinstance(other, CID):
             return False
         return self.value == other.value
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         """Return True if the other object is not a CID or has a different value, False otherwise."""
         return not self.__eq__(other)
 
