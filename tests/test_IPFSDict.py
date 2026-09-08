@@ -275,6 +275,7 @@ class TestIPFSDict(unittest.TestCase):
 
         self.assertIn('new_key', ipfs_dict)
         self.assertNotIn('old_key', ipfs_dict)
+        self.assertNotIn('shared_key', ipfs_dict)
         self.assertEqual(ipfs_dict['new_key'], 'new_value')
 
 
