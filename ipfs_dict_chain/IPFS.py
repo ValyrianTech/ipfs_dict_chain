@@ -58,7 +58,7 @@ def connect(host: str, port: int) -> None:
         new_address = Multiaddr(f'/ip4/{host}/tcp/{port}')
         _ = _get_loop().run_until_complete(_test_connection(maddr=new_address))
         multi_address = new_address  # Only update on success
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         if isinstance(e, IPFSError):
             raise
         raise IPFSError(f'Failed to connect to IPFS daemon at /ip4/{host}/tcp/{port}: {e}')
