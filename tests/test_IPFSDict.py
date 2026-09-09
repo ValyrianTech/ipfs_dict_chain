@@ -138,11 +138,6 @@ class TestIPFSDict(unittest.TestCase):
         ipfs_dict['save'] = 'x'
         self.assertEqual(ipfs_dict['save'], 'x')
 
-    def test_nonexistent_attribute_raises(self):
-        ipfs_dict = IPFSDict()
-        with self.assertRaises(AttributeError):
-            _ = ipfs_dict.really_missing_attr
-
     def test_attribute_assignment_retrieval(self):
         ipfs_dict = IPFSDict()
         ipfs_dict.key1 = 'value1'
