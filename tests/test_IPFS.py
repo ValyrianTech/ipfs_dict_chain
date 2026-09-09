@@ -7,7 +7,6 @@ from unittest.mock import AsyncMock, patch
 from multiaddr import Multiaddr
 
 import ipfs_dict_chain.IPFS
-
 from ipfs_dict_chain.IPFS import (
     IPFSCache,
     IPFSError,
