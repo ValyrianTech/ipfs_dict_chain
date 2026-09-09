@@ -65,6 +65,8 @@ print(loaded_dict.my_key1)  # Output: 'value1'
 
 Note: `IPFSDict.load()` replaces any existing data with the data loaded from IPFS. Loading into an already-populated `IPFSDict` will not merge data; it clears the existing keys first.
 
+Note: When using dot notation, class methods (such as `save()`, `load()`, and `cid()`) take precedence over data keys, so data keys cannot shadow these built-in methods. Use bracket notation (e.g. `my_dict['save']`) to access the raw data value when a key collides with a method name.
+
 ### IPFSDictChain
 
 IPFSDictChain is a dictionary-like data structure that stores its state on IPFS and keeps track of changes. Here's an example of how to use IPFSDictChain:

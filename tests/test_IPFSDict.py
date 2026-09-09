@@ -107,6 +107,37 @@ class TestIPFSDict(unittest.TestCase):
         with self.assertRaises(KeyError):
             ipfs_dict['_reserved'] = 'value'
 
+    def test_method_names_do_not_shadow_methods(self):
+        ipfs_dict = IPFSDict()
+        ipfs_dict['save'] = 'x'
+        self.assertTrue(callable(ipfs_dict.save))
+        ipfs_dict['load'] = 'x'
+        self.assertTrue(callable(ipfs_dict.load))
+        ipfs_dict['cid'] = 'x'
+        self.assertTrue(callable(ipfs_dict.cid))
+
+    @patch('ipfs_dict_chain.IPFSDict.add_json')
+    def test_method_name_keys_still_callable(self, mock_add_json):
+        mock_add_json.return_value = 'QmV5mPAcGoqegJnzFheED2pnef96633jSjimR2SSgu7ZV5'
+        ipfs_dict = IPFSDict()
+        ipfs_dict['save'] = 'x'
+        self.assertEqual(ipfs_dict.save(), '/ipfs/QmV5mPAcGoqegJnzFheED2pnef96633jSjimR2SSgu7ZV5')
+
+    def test_regular_data_keys_work(self):
+        ipfs_dict = IPFSDict()
+        ipfs_dict['key'] = 'value'
+        self.assertEqual(ipfs_dict.key, 'value')
+
+    def test_attribute_assignment_to_method_name(self):
+        ipfs_dict = IPFSDict()
+        ipfs_dict.save = 'x'
+        self.assertTrue(callable(ipfs_dict.save))
+
+    def test_method_name_key_accessible_via_bracket(self):
+        ipfs_dict = IPFSDict()
+        ipfs_dict['save'] = 'x'
+        self.assertEqual(ipfs_dict['save'], 'x')
+
     def test_attribute_assignment_retrieval(self):
         ipfs_dict = IPFSDict()
         ipfs_dict.key1 = 'value1'

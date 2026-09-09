@@ -14,11 +14,6 @@ class IPFSDict(dict):
     :type cid: Optional[str], optional
     """
 
-    _DICT_METHODS = frozenset({
-        'items', 'keys', 'values', 'get', 'pop', 'update', 'clear',
-        'copy', 'fromkeys', 'setdefault', 'popitem'
-    })
-
     def __init__(self, cid: str | None = None):
         """Initialize the IPFSDict object.
 
@@ -40,12 +35,15 @@ class IPFSDict(dict):
 
     def __getattribute__(self, key: str) -> Any:
         """Get attribute, retrieving data keys from the inherited dict."""
-        if key.startswith('_') or key in IPFSDict._DICT_METHODS:
+        if key.startswith('_'):
+            return super().__getattribute__(key)
+        # Check if it's a real class attribute/method first
+        if any(key in cls.__dict__ for cls in type(self).__mro__):
             return super().__getattribute__(key)
         try:
             return super().__getitem__(key)
         except KeyError:
-            return super().__getattribute__(key)
+            raise AttributeError(key)
 
     def items(self) -> list[tuple[str, Any]]:  # type: ignore[override]
         """Get the dictionary data. This is a list of key-value pairs with all the data except values that start with an underscore.
