@@ -38,13 +38,12 @@ class IPFSDict(dict):
         if key.startswith('_'):
             return super().__getattribute__(key)
         # Check if it's a real class attribute/method first
-        try:
+        if any(key in cls.__dict__ for cls in type(self).__mro__):
             return super().__getattribute__(key)
-        except AttributeError:
-            try:
-                return super().__getitem__(key)
-            except KeyError:
-                raise AttributeError(key)
+        try:
+            return super().__getitem__(key)
+        except KeyError:
+            raise AttributeError(key)
 
     def items(self) -> list[tuple[str, Any]]:  # type: ignore[override]
         """Get the dictionary data. This is a list of key-value pairs with all the data except values that start with an underscore.
