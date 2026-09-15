@@ -4,40 +4,70 @@
 import asyncio
 import atexit
 import json
+import threading
 import time
+from typing import Any
 
 import aioipfs
 from multiaddr import Multiaddr
 
 _loop = None
+_loop_thread = None
+_loop_lock = threading.Lock()
+
 
 def _get_loop() -> asyncio.AbstractEventLoop:
-    """Return the global asyncio event loop, creating it if necessary.
+    """Return the dedicated background event loop, starting its thread if needed.
 
-    If the global event loop is ``None`` or has been closed, a new event loop
-    is created and set as the current event loop for the thread.
+    The loop runs in its own daemon thread so that coroutines can be dispatched
+    safely from any thread -- including a thread that already has a running event
+    loop -- via :func:`asyncio.run_coroutine_threadsafe`.
 
-    :returns: The global asyncio event loop.
+    :returns: The dedicated background asyncio event loop.
     :rtype: asyncio.AbstractEventLoop
     """
-    global _loop
-    if _loop is None or _loop.is_closed():
-        _loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(_loop)
-    return _loop
+    global _loop, _loop_thread
+    with _loop_lock:
+        if _loop is None or _loop.is_closed():
+            _loop = asyncio.new_event_loop()
+            _loop_thread = threading.Thread(
+                target=_loop.run_forever,
+                name='ipfs_dict_chain-event-loop',
+                daemon=True,
+            )
+            _loop_thread.start()
+        return _loop
+
+
+def _run(coro: Any) -> Any:
+    """Run a coroutine on the background loop from any thread and return its result.
+
+    This is safe to call from within a running event loop as well as from
+    multiple threads concurrently, because the coroutine is scheduled on the
+    dedicated background loop via :func:`asyncio.run_coroutine_threadsafe`.
+
+    :param coro: The coroutine to run.
+    :returns: The result of the coroutine.
+    """
+    return asyncio.run_coroutine_threadsafe(coro, _get_loop()).result()
+
 
 @atexit.register
 def _close_loop() -> None:
-    """Close the global asyncio event loop at interpreter shutdown.
+    """Stop and close the background event loop at interpreter shutdown.
 
-    This function is registered with :func:`atexit.register` so that the
-    event loop is properly cleaned up when the Python interpreter exits.
-    If the loop is already closed or was never created, no action is taken.
+    This function is registered with :func:`atexit.register` so that the loop
+    and its thread are properly cleaned up when the Python interpreter exits.
+    If the loop was never created or is already closed, no action is taken.
     """
-    global _loop
+    global _loop, _loop_thread
     if _loop is not None and not _loop.is_closed():  # pragma: no cover
+        _loop.call_soon_threadsafe(_loop.stop)  # pragma: no cover
+        if _loop_thread is not None:  # pragma: no cover
+            _loop_thread.join(timeout=5)  # pragma: no cover
         _loop.close()  # pragma: no cover
         _loop = None  # pragma: no cover
+        _loop_thread = None  # pragma: no cover
 
 DEFAULT_HOST = '127.0.0.1'
 DEFAULT_PORT = 5001
@@ -56,7 +86,7 @@ def connect(host: str, port: int) -> None:
     global multi_address
     try:
         new_address = Multiaddr(f'/ip4/{host}/tcp/{port}')
-        _ = _get_loop().run_until_complete(_test_connection(maddr=new_address))
+        _ = _run(_test_connection(maddr=new_address))
         multi_address = new_address  # Only update on success
     except Exception as e:
         if isinstance(e, IPFSError):
@@ -227,7 +257,7 @@ def add_json(data: dict) -> str:
     :return: The Content Identifier (CID) of the added JSON data.
     :rtype: str
     """
-    return _get_loop().run_until_complete(_add_json(data=data))
+    return _run(_add_json(data=data))
 
 
 def get_json(cid: str) -> dict:
@@ -238,4 +268,4 @@ def get_json(cid: str) -> dict:
     :return: The JSON data retrieved from IPFS.
     :rtype: Dict
     """
-    return _get_loop().run_until_complete(_get_json(cid=cid))
+    return _run(_get_json(cid=cid))

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1] - 2026-09-15
+
+### Fixed
+
+- Fixed `RuntimeError: Cannot run the event loop while another loop is running` raised when the synchronous API (`get_json`, `add_json`, `connect`, and therefore `IPFSDict.load`, `IPFSDict.save`, `IPFSDictChain`, etc.) is called from within a running asyncio event loop (e.g. a FastAPI/uvicorn endpoint).
+- Fixed the shared module-level event loop not being thread-safe: concurrent calls from multiple threads no longer collide with `RuntimeError: This event loop is already running`.
+
+### Changed
+
+- The module-level event loop now runs in a dedicated daemon thread and coroutines are dispatched with `asyncio.run_coroutine_threadsafe`, which is safe to call from any thread, including a thread that already has a running event loop. Loop creation is guarded by a lock. The single shared loop and the `atexit` cleanup are preserved.
+
 ## [2.0.0] - 2026-09-09
 
 ### Changed (Breaking)

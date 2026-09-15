@@ -1,6 +1,7 @@
 # noqa: N999
 import asyncio
 import json
+import threading
 import unittest
 from unittest.mock import AsyncMock, patch
 
@@ -509,6 +510,69 @@ class TestIPFSEndToEnd(unittest.TestCase):
             for result in results:
                 self.assertIsInstance(result, str)
                 self.assertTrue(json.loads(result))  # Verify it's valid JSON
+
+
+class TestIPFSEventLoopSafety(unittest.TestCase):
+    """Regression tests for calling the sync API from running loops and multiple threads."""
+
+    @patch('aioipfs.AsyncIPFS')
+    def test_get_json_inside_running_loop(self, mock_ipfs):
+        """get_json must not raise when called from within a running event loop."""
+        mock_client = AsyncMock()
+        mock_client.cat = AsyncMock(return_value=json.dumps({"key": "value"}).encode())
+        mock_client.close = AsyncMock()
+        mock_ipfs.return_value = mock_client
+
+        async def main():
+            return get_json("QmRunningLoopGetCid")
+
+        result = asyncio.run(main())
+        self.assertEqual(result, {"key": "value"})
+
+    @patch('aioipfs.AsyncIPFS')
+    def test_add_json_inside_running_loop(self, mock_ipfs):
+        """add_json must not raise when called from within a running event loop."""
+        mock_client = AsyncMock()
+        mock_client.add_json = AsyncMock(return_value={"Hash": "QmRunningLoopAddCid"})
+        mock_client.close = AsyncMock()
+        mock_ipfs.return_value = mock_client
+
+        async def main():
+            return add_json({"key": "value"})
+
+        result = asyncio.run(main())
+        self.assertEqual(result, "QmRunningLoopAddCid")
+
+    @patch('aioipfs.AsyncIPFS')
+    def test_concurrent_calls_from_multiple_threads(self, mock_ipfs):
+        """Concurrent sync calls from multiple threads must not collide on the loop."""
+        mock_client = AsyncMock()
+        mock_client.cat = AsyncMock(return_value=json.dumps({"key": "value"}).encode())
+        mock_client.close = AsyncMock()
+        mock_ipfs.return_value = mock_client
+
+        results = []
+        errors = []
+
+        def worker(cid):
+            try:
+                results.append(get_json(cid))
+            except Exception as e:  # noqa: BLE001
+                errors.append(e)
+
+        threads = [
+            threading.Thread(target=worker, args=(f"QmConcurrentCid{i}",))
+            for i in range(10)
+        ]
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+
+        self.assertEqual(errors, [])
+        self.assertEqual(len(results), 10)
+        for result in results:
+            self.assertEqual(result, {"key": "value"})
 
 
 if __name__ == '__main__':
